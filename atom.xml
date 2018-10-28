@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>circlePi&#39;s blog</title>
+  <title>circlepi&#39;s blog</title>
   
-  
+  <subtitle>Even with an intractable probelm, one can find a way to do the right thing.</subtitle>
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://state-of-art.top/"/>
@@ -10,7 +10,7 @@
   <id>http://state-of-art.top/</id>
   
   <author>
-    <name>circlePi</name>
+    <name>circlepi</name>
     
   </author>
   
