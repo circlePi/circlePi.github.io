@@ -137,7 +137,7 @@
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-neural_network-7.png">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-learningrates.jpeg">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/%E8%87%AA%E9%80%82%E5%BA%94SGD%E6%96%B9%E6%B3%95.gif">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-saddlepoint.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/%E9%A9%AC%E9%9E%8D%E7%82%B9.gif">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-triangle.png">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-graph.png">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-deciding-baselr-maxlr.png">
@@ -145,7 +145,7 @@
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-exp_range.png">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-cifar10.png">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-adam.png">
-<meta property="og:updated_time" content="2018-10-29T15:23:45.989Z">
+<meta property="og:updated_time" content="2018-10-29T15:29:02.011Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="周期性学习率(Cyclical Learning Rate)技术">
 <meta name="twitter:description" content="本文介绍神经网络训练中的周期性学习率技术。 Introduction学习率(learning_rate, LR)是神经网络训练过程中最重要的超参数之一，它对于快速、高效地训练神经网络至关重要。简单来说，LR决定了我们当前的权重参数朝着降低损失的方向上改变多少。 1new_weight = exsiting_weight - learning_rate * gradient  Fig.: A sim">
@@ -500,7 +500,7 @@
 <p><em>Adaptive learning rates are fundamentally different from CLR policies, and CLR can be combined with adaptive learning rates, as shown in Section 4.1. In addition, CLR policies are computationally simpler than adaptive learning rates. CLR is likely most similar to the SGDR method that appeared recently.</em></p>
 <h3 id="Why-it-works"><a href="#Why-it-works" class="headerlink" title="Why it works"></a>Why it works</h3><p>直觉上看，随着训练进度的增加我们应该保持学习率一直减小以便于在某一时刻达到收敛。</p>
 <p>然而，事实恰与直觉相反，使用一个在给定区间里周期性变化的LR可能更有用处。原因是周期性高的学习率能够使模型跳出在训练过程中遇到的局部最低点和马鞍点。事实上，Dauphin等[3]指出相比于局部最低点，马鞍点更加阻碍收敛。如果马鞍点正好发生在一个巧妙的平衡点，小的学习率通常不能产生足够大的梯度改变使其跳过该点（即使跳过，也需要花费很长时间）。这正是周期性高学习率的作用所在，它能够更快地跳过马鞍点。</p>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-saddlepoint.png" alt="image text"></p>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/%E9%A9%AC%E9%9E%8D%E7%82%B9.gif" alt="image text"></p>
 <p><em><center>Fig.: A saddle point in the error surface (Img Credit: safaribooksonline)</center></em></p>
 <p>另外一个好处是，最优的LR肯定落在最小值和最大值之间。换言之，我们确实在迭代过程中使用了最好的LR。</p>
 <h4 id="Epoch，iterations-cycles-and-stepsize"><a href="#Epoch，iterations-cycles-and-stepsize" class="headerlink" title="Epoch，iterations, cycles and stepsize"></a>Epoch，iterations, cycles and stepsize</h4><p>首先介绍几个术语，理解这些术语可以更好地理解下面描述的算法和公式。</p>
