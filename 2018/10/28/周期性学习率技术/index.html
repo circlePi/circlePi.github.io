@@ -113,7 +113,7 @@
 
 
 
-  <meta name="keywords" content="Tensorflow,">
+  <meta name="keywords" content="超参数,学习率,">
 
 
 
@@ -126,18 +126,30 @@
 
 
 
-<meta name="description" content="本文介绍图片数据使用TFrecord和tf.data.dataset进行存储和读取。 Tensorflow 提供了四种数据读取方式：  Preloaded data: 用一个tf.constant常量将数据集加载进来，主要用于很小的数据集；  Feeding: 使用python代码供给数据，将所有数据加载进内存，然后一个batch一个batch地输入到计算图中， 适用于小数据集；  QueueRu">
-<meta name="keywords" content="Tensorflow">
+<meta name="description" content="本文介绍神经网络训练中的周期性学习率技术。 Introduction学习率(learning_rate, LR)是神经网络训练过程中最重要的超参数之一，它对于快速、高效地训练神经网络至关重要。简单来说，LR决定了我们当前的权重参数朝着降低损失的方向上改变多少。 1new_weight = exsiting_weight - learning_rate * gradient  Fig.: A sim">
+<meta name="keywords" content="超参数,学习率">
 <meta property="og:type" content="article">
-<meta property="og:title" content="图像数据-TFrecord在动态图中的使用">
-<meta property="og:url" content="http://state-of-art.top/2018/10/27/TFrecord在动态图中的使用/index.html">
+<meta property="og:title" content="周期性学习率(Cyclical Learning Rate)技术">
+<meta property="og:url" content="http://state-of-art.top/2018/10/28/周期性学习率技术/index.html">
 <meta property="og:site_name" content="circlepi&#39;s blog">
-<meta property="og:description" content="本文介绍图片数据使用TFrecord和tf.data.dataset进行存储和读取。 Tensorflow 提供了四种数据读取方式：  Preloaded data: 用一个tf.constant常量将数据集加载进来，主要用于很小的数据集；  Feeding: 使用python代码供给数据，将所有数据加载进内存，然后一个batch一个batch地输入到计算图中， 适用于小数据集；  QueueRu">
+<meta property="og:description" content="本文介绍神经网络训练中的周期性学习率技术。 Introduction学习率(learning_rate, LR)是神经网络训练过程中最重要的超参数之一，它对于快速、高效地训练神经网络至关重要。简单来说，LR决定了我们当前的权重参数朝着降低损失的方向上改变多少。 1new_weight = exsiting_weight - learning_rate * gradient  Fig.: A sim">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-10-28T08:50:46.251Z">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-neural_network-7.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-learningrates.jpeg">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/%E8%87%AA%E9%80%82%E5%BA%94SGD%E6%96%B9%E6%B3%95.gif">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-saddlepoint.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-triangle.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-graph.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-deciding-baselr-maxlr.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-triangular2.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-exp_range.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-cifar10.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-adam.png">
+<meta property="og:updated_time" content="2018-10-29T14:47:36.827Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="图像数据-TFrecord在动态图中的使用">
-<meta name="twitter:description" content="本文介绍图片数据使用TFrecord和tf.data.dataset进行存储和读取。 Tensorflow 提供了四种数据读取方式：  Preloaded data: 用一个tf.constant常量将数据集加载进来，主要用于很小的数据集；  Feeding: 使用python代码供给数据，将所有数据加载进内存，然后一个batch一个batch地输入到计算图中， 适用于小数据集；  QueueRu">
+<meta name="twitter:title" content="周期性学习率(Cyclical Learning Rate)技术">
+<meta name="twitter:description" content="本文介绍神经网络训练中的周期性学习率技术。 Introduction学习率(learning_rate, LR)是神经网络训练过程中最重要的超参数之一，它对于快速、高效地训练神经网络至关重要。简单来说，LR决定了我们当前的权重参数朝着降低损失的方向上改变多少。 1new_weight = exsiting_weight - learning_rate * gradient  Fig.: A sim">
+<meta name="twitter:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-neural_network-7.png">
 
 
 
@@ -167,13 +179,13 @@
 
 
 
-  <link rel="canonical" href="http://state-of-art.top/2018/10/27/TFrecord在动态图中的使用/">
+  <link rel="canonical" href="http://state-of-art.top/2018/10/28/周期性学习率技术/">
 
 
 
 
 
-  <title>图像数据-TFrecord在动态图中的使用 | circlepi's blog</title>
+  <title>周期性学习率(Cyclical Learning Rate)技术 | circlepi's blog</title>
   
 
 
@@ -343,7 +355,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://state-of-art.top/2018/10/27/TFrecord在动态图中的使用/">
+    <link itemprop="mainEntityOfPage" href="http://state-of-art.top/2018/10/28/周期性学习率技术/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="circlepi">
@@ -360,7 +372,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">图像数据-TFrecord在动态图中的使用</h1>
+          <h1 class="post-title" itemprop="name headline">周期性学习率(Cyclical Learning Rate)技术</h1>
         
 
         <div class="post-meta">
@@ -372,8 +384,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-27T23:21:08+08:00">
-                2018-10-27
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-28T23:21:08+08:00">
+                2018-10-28
               </time>
             
 
@@ -395,8 +407,8 @@
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/Tensorflow/" itemprop="url" rel="index">
-                    <span itemprop="name">Tensorflow</span>
+                  <a href="/categories/深度学习/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
                   </a>
                 </span>
 
@@ -413,8 +425,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/10/27/TFrecord在动态图中的使用/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/27/TFrecord在动态图中的使用/" itemprop="commentCount"></span>
+                <a href="/2018/10/28/周期性学习率技术/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/28/周期性学习率技术/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -436,7 +448,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  1.1k
+                  2.2k
                 </span>
               
 
@@ -461,37 +473,85 @@
       
 
       
-        <p>本文介绍图片数据使用TFrecord和tf.data.dataset进行存储和读取。</p>
-<p>Tensorflow 提供了四种数据读取方式：</p>
+        <p>本文介绍神经网络训练中的周期性学习率技术。</p>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>学习率(learning_rate, LR)是神经网络训练过程中最重要的超参数之一，它对于快速、高效地训练神经网络至关重要。简单来说，LR决定了我们当前的权重参数朝着降低损失的方向上改变多少。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">new_weight = exsiting_weight - learning_rate * gradient</span><br></pre></td></tr></table></figure>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-neural_network-7.png" alt="image text"></p>
+<p><em>Fig.: A simple neural network where the w’s and b’s are to be learnt (Img Credit: Matt Mazur)</em></p>
+<p>这看上去很简单。但是正如许多研究显示的那样，单单通过提升这一步就会对我们的训练产生深远的影响，并且尚有很大的优化空间。</p>
+<p>本文介绍了一种叫做周期性学习率（CLR）的技术，它是一种非常新的、简单的想法，用来设置和控制训练过程中LR的大小。该技术在<a href="https://twitter.com/jeremyphoward" target="_blank" rel="noopener">jeremyphoward</a>今年的<a href="http://www.fast.ai/" target="_blank" rel="noopener">fast.ai course</a>课程中提及过。</p>
+<h2 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h2><p>神经网络用来完成某项任务需要对大量参数进行训练。参数训练意味着寻找合适的一些参数，使得在每个batch训练完成后损失（loss）达到最小。</p>
+<p>通常来说，有两种广泛使用的方法用来设置训练过程中的LR。</p>
+<h3 id="One-LR-for-all-parameters"><a href="#One-LR-for-all-parameters" class="headerlink" title="One LR for all parameters"></a>One LR for all parameters</h3><p>一个典型的例子是<a href="https://en.wikipedia.org/wiki/Stochastic_gradient_descent" target="_blank" rel="noopener">SGD</a>， 在训练开始时设置一个LR常量，并且设定一个LR衰减策略（如step，exponential等）。这个单一的LR用来更新所有的参数。在每个epochs中，LR按预先设定随时间逐渐衰减，当我们临近最小损失时， 通过衰减可以减缓更新，以防止我们越过最小值。</p>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-learningrates.jpeg" alt="image text"></p>
+<p><em>Fig. Effect of various learning rates on convergence (Img Credit: cs231n)</em></p>
+<p>该方法存在如下挑战(<a href="https://arxiv.org/abs/1609.04747" target="_blank" rel="noopener">refer</a>)：</p>
 <ol>
-<li><p>Preloaded data: 用一个tf.constant常量将数据集加载进来，主要用于很小的数据集；</p>
-</li>
-<li><p>Feeding: 使用python代码供给数据，将所有数据加载进内存，然后一个batch一个batch地输入到计算图中， 适用于小数据集；</p>
-</li>
-<li>QueueRunner: 基于队列的输入通道，读取TFrecord静态图使用；</li>
-<li>tf.data API: 能够从不同的输入或文件格式中读取、预处理数据，并且对数据应用一些变换（例如，batching、shuffling、mapping function over the dataset），tf.data API 是旧的 feeding、QueueRunner的升级。值得注意的是， Eager模式必须使用该API来构建输入通道， 一般结合TFrecord使用。该API相比于Queue更容易使用。</li>
+<li>难以选择初始的LR达到想要的效果（如上图所示）；</li>
+<li>LR衰减策略同样难以设定，他们很难自适应动态变化的数据；</li>
+<li>所有的参数使用相同的LR进行更新，而这些参数可能学习速率不完全相同；</li>
+<li>很容易陷入马鞍点不能自拔（下面会阐述）</li>
 </ol>
-<h2 id="What‘s-TFrecord"><a href="#What‘s-TFrecord" class="headerlink" title="What‘s TFrecord"></a>What‘s TFrecord</h2><p>TFrecord是Tensorflow提供的一种二进制存储格式，可将数据和标签统一存储。从上述读取方式中可以看出，TFrecord在QueueRunner和tf.data API读取中均扮演了重要的角色。</p>
-<h2 id="Why-TFrecord"><a href="#Why-TFrecord" class="headerlink" title="Why TFrecord"></a>Why TFrecord</h2><p>与其他方案相比， 使用TFrecord读取的优点在于：</p>
-<ol>
-<li>可处理大规模数据量，而不会造成其他方案所带来的内存不够用的问题；</li>
-<li>在Feeding方案中，batch读取的IO操作势必会阻塞训练，前一个batch加载完成后，神经网络必须等待下一个batch加载完成后才能继续训练，效率较低。</li>
+<h3 id="Adaptive-LR-for-each-parameter"><a href="#Adaptive-LR-for-each-parameter" class="headerlink" title="Adaptive LR for each parameter"></a>Adaptive LR for each parameter</h3><p>一些改进的优化器如<em>AdaGrad</em>, <em>AdaDelta</em>, <em>RMSprop</em> and <em>Adam</em> 很大程度上缓解了上述困难，方法是对每个参数采用不同的自适应学习率。比如AdaDelta，它的更新机制甚至不需要我们主动设置默认的学习率。</p>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/%E8%87%AA%E9%80%82%E5%BA%94SGD%E6%96%B9%E6%B3%95.gif" alt="image text"></p>
+<p><em>Fig: Animation comparing optimization algorithms (Img Credit: Alec Radford)</em></p>
+<h2 id="Cycling-Learning-Rate"><a href="#Cycling-Learning-Rate" class="headerlink" title="Cycling Learning Rate"></a>Cycling Learning Rate</h2><p>CLR是Leslie Smith于2015年提出的。这是一种调节LR的方法，在该方法中，设定一个LR上限和下限，LR的值在上限和下限的区间里周期性地变化。看上去，LCR似乎是自适应LR技术和SGD的竞争者，事实上，CLR技术是可以和上述提到的改进的优化器一起使用来进行参数更新的。</p>
+<p>而在计算上，CLR比上述提到的改进的优化器更容易实现，正如文献[1]所述：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Adaptive learning rates are fundamentally different from CLR policies, and CLR can be combined with adaptive learning rates, as shown in Section 4.1. In addition, CLR policies are computationally simpler than adaptive learning rates. CLR is likely most similar to the SGDR method that appeared recently.</span><br></pre></td></tr></table></figure>
+<h3 id="Why-it-works"><a href="#Why-it-works" class="headerlink" title="Why it works"></a>Why it works</h3><p>直觉上看，随着训练进度的增加我们应该保持学习率一直减小以便于在某一时刻达到收敛。</p>
+<p>然而，事实恰与直觉相反，使用一个在给定区间里周期性变化的LR可能更有用处。原因是周期性高的学习率能够使模型跳出在训练过程中遇到的局部最低点和马鞍点。事实上，Dauphin等[3]指出相比于局部最低点，马鞍点更加阻碍收敛。如果马鞍点正好发生在一个巧妙的平衡点，小的学习率通常不能产生足够大的梯度改变使其跳过该点（即使跳过，也需要花费很长时间）。这正是周期性高学习率的作用所在，它能够更快地跳过马鞍点。</p>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-saddlepoint.png" alt="image text"></p>
+<p><em>Fig.: A saddle point in the error surface (Img Credit: safaribooksonline)</em></p>
+<p>另外一个好处是，最优的LR肯定落在最小值和最大值之间。换言之，我们确实在迭代过程中使用了最好的LR。</p>
+<h4 id="Epoch，iterations-cycles-and-stepsize"><a href="#Epoch，iterations-cycles-and-stepsize" class="headerlink" title="Epoch，iterations, cycles and stepsize"></a>Epoch，iterations, cycles and stepsize</h4><p>首先介绍几个术语，理解这些术语可以更好地理解下面描述的算法和公式。</p>
+<p>我们现在考虑一个包含50000个样本的训练集。</p>
+<p>一个epoch是至将整个训练集训练一轮。如果我们将batch_size, 我们在一个epoch里会得到500个batch或者叫iteration。iteration的数目随着epoch的增加不断积累，在第二个epoch，对应着501到1000次iteration，后面的以此类推。</p>
+<p>一个cycle定义为学习率从低到高，然后从高到低走一轮所用的iteration数。而stepsize指的是cycle迭代步数的一半。注意，cycle不一定必须和epoch相同，但实践上通常将cycle和epoch对应相同的iteration。</p>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-triangle.png" alt="image text"></p>
+<p><em>Fig: Triangular LR policy. (Img Credit: <a href="https://arxiv.org/pdf/1506.01186.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1506.01186.pdf</a>)</em></p>
+<p>在上图中，两条红线分别表示学习率最小值（base lr）和学习率最大值（max lr）。蓝色的线是学习率随着iteration改变的方式。蓝线上下一次表示一个cycle，stepsize则是其一半。</p>
+<h3 id="Calculating-the-LR"><a href="#Calculating-the-LR" class="headerlink" title="Calculating the LR"></a>Calculating the LR</h3><p>综上所述，接下来我们需要参数作为该算法的输入：</p>
+<ul>
+<li style="list-style: none"><input type="checkbox"> stepsize</li>
+<li style="list-style: none"><input type="checkbox"> base_lr</li>
+<li style="list-style: none"><input type="checkbox"> max_lr</li>
+</ul>
+<p>下面是LR更新的一段代码。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_triangular_lr</span><span class="params">(iteration, stepsize, base_lr, max_lr)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    Given the inputs, calculates the lr that should be</span></span><br><span class="line"><span class="string">    applicable for this iteration</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    cycle = np.floor(<span class="number">1</span> + iteration/(<span class="number">2</span>  * stepsize))</span><br><span class="line">    x = np.abs(iteration/stepsize - <span class="number">2</span> * cycle + <span class="number">1</span>)</span><br><span class="line">    lr = base_lr + (max_lr - base_lr) * np.maximum(<span class="number">0</span>, (<span class="number">1</span>-x))</span><br><span class="line">    <span class="keyword">return</span> lr</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment"># Demo of how the LR varies with iterations</span></span><br><span class="line">    num_iterations = <span class="number">10000</span></span><br><span class="line">    stepsize = <span class="number">1000</span></span><br><span class="line">    base_lr = <span class="number">0.0001</span></span><br><span class="line">    max_lr = <span class="number">0.001</span></span><br><span class="line">    lr_trend = list()</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> iteration <span class="keyword">in</span> range(num_iterations):</span><br><span class="line">        lr = get_triangular_lr(iteration, stepsize, base_lr, max_lr)</span><br><span class="line">        <span class="comment"># Update your optimizer to use this learning rate in this iteration</span></span><br><span class="line">        lr_trend.append(lr)</span><br><span class="line">    </span><br><span class="line">    plt.plot(lr_trend)</span><br><span class="line">    plt.show()</span><br></pre></td></tr></table></figure>
+<p>结果如下图所示。</p>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-graph.png" alt="image text"></p>
+<p><em>Fig: Graph showing the variation of lr with iteration. We are using the triangular profile.</em></p>
+<h3 id="Deriving-the-optimal-base-lr-and-max-lr"><a href="#Deriving-the-optimal-base-lr-and-max-lr" class="headerlink" title="Deriving the optimal base lr and max lr"></a>Deriving the optimal base lr and max lr</h3><p>对于给定的数据集，怎么确定合理的base lr 和max lr呢？</p>
+<p>答案是先跑几个epoch，并且让学习率线性增加，观察准确率的变化，从中选出合适的base 和max lr。</p>
+<p>我们让学习率按照上面的斜率进行增长，跑了几轮，结果如下图所示。</p>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-deciding-baselr-maxlr.png" alt="image text"></p>
+<p><em>Fig: Plot of accuracy vs learning rate (Img Credit: <a href="https://arxiv.org/pdf/1506.01186.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1506.01186.pdf</a>)</em></p>
+<p>可以看出，开始的时候，准确率随着学习率的增加而增加，然后进入平缓起期，然后又开始减小，出现震荡。注意图中准确率开始增长的那一点和达到平衡的那一点（图中红色箭头所示）。这两个点可以作为比较好的base lr 和 max lr。当然，你也可以选择平衡点旁边的准确率峰值点作为max lr， 把base lr 设为其1/3 或者1/4。</p>
+<p>好了，三个参数中已经有两个确定了，那么怎么确定stepsize呢？</p>
+<p>已经有论文做过实验，他们将stepsize设成一个epoch包含的iteration数量的2-10倍。拿我们之前举的例子来说，我们一个epoch包含500个iteration，那么stepsize就设成1000-5000。该论文实验表明，stepsize设成2倍或者10倍，两者结果并没有太大的不同。</p>
+<h3 id="Variants"><a href="#Variants" class="headerlink" title="Variants"></a>Variants</h3><p>上面我们实现的算法中，学习率是按照三角的规律周期性变化。除了这种以外，还有其他集中不同的函数形式。</p>
+<p><strong><em>traiangular2：</em></strong>这里max lr 按cycle进行对半衰减。</p>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-triangular2.png" alt="image text"></p>
+<p><em>Fig: Graph showing the variation of lr with iteration for the triangular2 approach (Img Credit: Brad Kenstler)</em></p>
+<p><strong><em>exp_range：</em></strong>这里max lr按iteration进行指数衰减。</p>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-exp_range.png" alt="image text"></p>
+<p><em>Fig: Graph showing the variation of lr with iteration for the exp-range approach (Img Credit: Brad Kenstler)</em></p>
+<p>这些与固定学习率的指数衰减（exponential decay）相比，有论文表明效果都得到了明显的提升。</p>
+<h3 id="Results"><a href="#Results" class="headerlink" title="Results"></a>Results</h3><p>如下图所示，在某神经网络上，CLR提供了一个快速的收敛，因此它的确值得一试。</p>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-cifar10.png" alt="image text"></p>
+<p><em>Fig. CLR tested on CIFAR 10 (Img Credit: <a href="https://arxiv.org/pdf/1506.01186.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1506.01186.pdf</a>)</em></p>
+<p>在上图的试验中，CLR花了25K次迭代达到了81%的准确率，传统的LR更新方法大约需要70K才能达到同样的水平。</p>
+<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-adam.png" alt="image text"></p>
+<p><em>Fig. CLR used with Nesterov and Adam. Much faster convergence with Nesterov (Nesterov is an improvement over SGD) (Img Credit: <a href="https://arxiv.org/pdf/1506.01186.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1506.01186.pdf</a>)</em></p>
+<p>在另一项试验中，如上图所示，CLR + Nesterov优化器比著名的Adam收敛的还要快。</p>
+<h3 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h3><p>CLR带来了一种新的方案来控制学习率的更新，它可以与SGD以及一些更加高级的优化器上一起使用。CLR应该成为每一个深度学习实践者工具箱里的一项技术。</p>
+<h3 id="References"><a href="#References" class="headerlink" title="References"></a>References</h3><ol>
+<li><a href="https://arxiv.org/pdf/1506.01186.pdf" target="_blank" rel="noopener">Cyclical Learning Rates for Training Neural Networks, Smith</a></li>
+<li><a href="https://arxiv.org/pdf/1609.04747.pdf" target="_blank" rel="noopener">An overview of gradient descent optimization algorithms, Rudder</a></li>
+<li>Y. N. Dauphin, H. de Vries, J. Chung, and Y. Bengio. Rmsprop and equilibrated adaptive learning rates for non-convex optimization.</li>
+<li><a href="https://arxiv.org/abs/1608.03983" target="_blank" rel="noopener">SGDR: Stochastic Gradient Descent with Warm Restarts, Loshchilov, Hutter</a></li>
+<li><a href="https://github.com/bckenstler/CLR" target="_blank" rel="noopener">https://github.com/bckenstler/CLR</a></li>
 </ol>
-<h2 id="How-To-Use"><a href="#How-To-Use" class="headerlink" title="How To Use"></a>How To Use</h2><p>TFrecord的使用主要有两块：一是图片数据转TFrecord格式存储，二是解析存储好的TFrecord文件。下面逐一介绍。</p>
-<h3 id="图片转TFrecord"><a href="#图片转TFrecord" class="headerlink" title="图片转TFrecord"></a>图片转TFrecord</h3><p>本文使用的数据集是Kaggle猫狗数据集。</p>
-<p>该数据集包含train和test两个文件夹， 分别为训练集和测试集，下面以train集为例操作。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ls |wc -w</span><br><span class="line"></span><br><span class="line">25000</span><br></pre></td></tr></table></figure>
-<p>训练集包含25000张图片，猫狗各一半。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ls </span><br><span class="line"></span><br><span class="line">cat.124.jpg    cat.3750.jpg  cat.6250.jpg  cat.8751.jpg  dog.11250.jpg  dog.2500.jpg   dog.5000.jpg  dog.7501.jpg</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p>图片文件以jpg格式存储，以cat， dog作为文件名开头。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">img_tfrecord_encode</span><span class="params">(classes, tfrecord_filename, data_path, is_training=True)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    功能：读取图片转换成tfrecord格式的文件</span></span><br><span class="line"><span class="string">    @params: classes: 标签类别  @type：classes: dict</span></span><br><span class="line"><span class="string">    @params: tfrecord_filename: tfrecord文件保存文件</span></span><br><span class="line"><span class="string">    @type：tfrecord_filename: str</span></span><br><span class="line"><span class="string">    @params: data_path: 原始训练集存储路径</span></span><br><span class="line"><span class="string">    @is_training: 是否为训练集，用来区分训练集和测试集</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="comment"># 初始化一个writer</span></span><br><span class="line">    writer = tf.python_io.TFRecordWriter(tfrecord_filename)</span><br><span class="line">    <span class="keyword">for</span> img_name <span class="keyword">in</span> tqdm(os.listdir(path)):</span><br><span class="line">        name = img_name.split(<span class="string">'.'</span>)[<span class="number">0</span>]</span><br><span class="line">        <span class="comment"># 使用tf.gfile.FastFile读取图片要比PIL.Image读取处理得到的</span></span><br><span class="line">        <span class="comment"># 最终TFrecod文件小得多，在本案例中，IMAGE方式读取得到的TFrecord大小约为3.7G</span></span><br><span class="line">        <span class="comment"># 而tf.gfile.FastFile得到的约为548M</span></span><br><span class="line">        <span class="keyword">with</span> tf.gfile.FastGFile(os.path.join(path, img_name), <span class="string">'rb'</span>) <span class="keyword">as</span> gf:</span><br><span class="line">            img = gf.read()</span><br><span class="line">        <span class="keyword">if</span> is_training:</span><br><span class="line">            <span class="comment"># 构造特征</span></span><br><span class="line">            feature = &#123;</span><br><span class="line">                <span class="string">'label'</span>: tf.train.Feature(int64_list=tf.train.Int64List(value=[classes[name]])),</span><br><span class="line">                <span class="string">'img_raw'</span>: tf.train.Feature(bytes_list=tf.train.BytesList(value=[img])),</span><br><span class="line">                <span class="string">'file_name'</span>: tf.train.Feature(bytes_list=tf.train.BytesList(value=[img_name.encode()]))</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            feature = &#123;</span><br><span class="line">                <span class="string">'label'</span>: tf.train.Feature(int64_list=tf.train.Int64List(value=[<span class="number">-1</span>])),</span><br><span class="line">                <span class="string">'img_raw'</span>:tf.train.Feature(bytes_list=tf.train.BytesList(value=[img])),</span><br><span class="line">                <span class="string">'file_name'</span>: tf.train.Feature(bytes_list=tf.train.BytesList(value=[img_name.encode()]))</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="comment"># example 对象将label和image特征进行封装</span></span><br><span class="line">        example = tf.train.Example(features=tf.train.Features(feature=feature))  </span><br><span class="line">        writer.write(example.SerializeToString())   <span class="comment"># 序列化为字符串</span></span><br><span class="line">    writer.close()</span><br><span class="line">    print(<span class="string">'tfrecord writen done!'</span>)</span><br></pre></td></tr></table></figure>
-<p>调用上述函数，可得到猫狗训练集的TFrecord格式文件</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    classes = &#123;<span class="string">'cat'</span>: <span class="number">0</span>, <span class="string">'dog'</span>: <span class="number">1</span>&#125;</span><br><span class="line">    tfrecord_filename = <span class="string">'cat_and_dog.tfrecord'</span></span><br><span class="line">    data_path = <span class="string">'train/'</span></span><br><span class="line">    img_tfrecord_encode(classes, tfrecord_filename, data_path, is_training=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure>
-<p>上述程序运行大约需要2min。</p>
-<h3 id="使用tf-data读取TFrecord"><a href="#使用tf-data读取TFrecord" class="headerlink" title="使用tf.data读取TFrecord"></a>使用tf.data读取TFrecord</h3><p>在动态图（eager）模式下，QueueRunner不可用，必须使用tf.data进行TFrecord的读取。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">img_tfrecord_parse</span><span class="params">(tfrecord_filename, epochs, batch_size, shape,</span></span></span><br><span class="line"><span class="function"><span class="params">                       padded_shapes=None, shuffle=True, buffer_size=<span class="number">1000</span>)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    @param: tfrecord_filename:tfrecord文件列表   @type:list</span></span><br><span class="line"><span class="string">    @param: epoch:训练轮数（repeating次数）       @type:int</span></span><br><span class="line"><span class="string">    @param：batch_size:批数据大小                @type:int</span></span><br><span class="line"><span class="string">    @param: shape:图片维度                      @type:tuple</span></span><br><span class="line"><span class="string">    @param: padded_shapes:不定长padding        @type:tuple</span></span><br><span class="line"><span class="string">    @param: shuffle:是否打乱                   @type:boolean</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">	<span class="comment"># 解析单个example，特征与encode一一对应。</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">parse_example</span><span class="params">(serialized_example)</span>:</span></span><br><span class="line">        features = tf.parse_single_example(serialized_example,</span><br><span class="line">                                           features=&#123;</span><br><span class="line">                                               <span class="string">'label'</span>: tf.FixedLenFeature([], tf.int64),</span><br><span class="line">                                               <span class="string">'img_raw'</span>: tf.FixedLenFeature([], tf.string),</span><br><span class="line">                                               <span class="string">'file_name'</span>: tf.FixedLenFeature([], tf.string)</span><br><span class="line">                                           &#125;)</span><br><span class="line">        <span class="comment"># 解码</span></span><br><span class="line">        image = tf.image.decode_jpeg(features[<span class="string">'img_raw'</span>])</span><br><span class="line">        <span class="comment"># 设置shape</span></span><br><span class="line">        image = tf.image.resize_images(image, shape, method=<span class="number">1</span>)</span><br><span class="line">        label = tf.cast(features[<span class="string">'label'</span>], tf.int64)</span><br><span class="line">        file_name = tf.cast(features[<span class="string">'file_name'</span>], tf.string)</span><br><span class="line">        <span class="keyword">return</span> image, label, file_name</span><br><span class="line">    </span><br><span class="line">	<span class="comment"># 解析TFrecord</span></span><br><span class="line">    dataset = tf.data.TFRecordDataset(tfrecord_filename).map(parse_example)</span><br><span class="line">    <span class="keyword">if</span> shuffle:</span><br><span class="line">        <span class="keyword">if</span> padded_shapes:</span><br><span class="line">            dataset = dataset.repeat(epochs).shuffle(buffer_size=buffer_size).padded_batch(batch_size, padded_shapes)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            dataset = dataset.repeat(epochs).shuffle(buffer_size=buffer_size).batch(batch_size)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">if</span> padded_shapes:</span><br><span class="line">            dataset = dataset.repeat(epochs).padded_batch(batch_size, padded_shapes)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            dataset = dataset.repeat(epochs).batch(batch_size)</span><br><span class="line">    <span class="keyword">return</span> dataset</span><br></pre></td></tr></table></figure>
-<p>调用上述函数，解析TFrecord得到dataset。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>():</span><br><span class="line">    tfrecord_filename = <span class="string">'cat_and_dog.tfrecord'</span></span><br><span class="line">    epochs = <span class="number">100</span></span><br><span class="line">    batch_size = <span class="number">64</span></span><br><span class="line">    shape = (<span class="number">227</span>, <span class="number">227</span>)</span><br><span class="line">    dataset = img_tfrecord_parse(tfrecord_filename=tfrecord_filename,</span><br><span class="line">                                epochs=epochs,</span><br><span class="line">                                batch_size=batch_size,</span><br><span class="line">                                shape=shape)</span><br><span class="line">    <span class="comment"># 查看dataset</span></span><br><span class="line">    iterator = dataset.make_one_hot_iterator()</span><br><span class="line">    image, label, file_name = iterator.get_next()</span><br><span class="line">    print(image[<span class="number">0</span>])</span><br><span class="line">    print(label[<span class="number">0</span>])</span><br><span class="line">    print(file_name[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -512,7 +572,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://state-of-art.top/2018/10/27/TFrecord在动态图中的使用/" title="图像数据-TFrecord在动态图中的使用">http://state-of-art.top/2018/10/27/TFrecord在动态图中的使用/</a>
+    <a href="http://state-of-art.top/2018/10/28/周期性学习率技术/" title="周期性学习率(Cyclical Learning Rate)技术">http://state-of-art.top/2018/10/28/周期性学习率技术/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -527,7 +587,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Tensorflow/" rel="tag"># Tensorflow</a>
+            <a href="/tags/超参数/" rel="tag"># 超参数</a>
+          
+            <a href="/tags/学习率/" rel="tag"># 学习率</a>
           
         </div>
       
@@ -540,15 +602,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2018/10/27/TFrecord在动态图中的使用/" rel="next" title="图像数据-TFrecord在动态图中的使用">
+                <i class="fa fa-chevron-left"></i> 图像数据-TFrecord在动态图中的使用
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/10/28/周期性学习率技术/" rel="prev" title="周期性学习率(Cyclical Learning Rate)技术">
-                周期性学习率(Cyclical Learning Rate)技术 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -734,7 +796,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#What‘s-TFrecord"><span class="nav-number">1.</span> <span class="nav-text">What‘s TFrecord</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Why-TFrecord"><span class="nav-number">2.</span> <span class="nav-text">Why TFrecord</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#How-To-Use"><span class="nav-number">3.</span> <span class="nav-text">How To Use</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#图片转TFrecord"><span class="nav-number">3.1.</span> <span class="nav-text">图片转TFrecord</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用tf-data读取TFrecord"><span class="nav-number">3.2.</span> <span class="nav-text">使用tf.data读取TFrecord</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Motivation"><span class="nav-number">2.</span> <span class="nav-text">Motivation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#One-LR-for-all-parameters"><span class="nav-number">2.1.</span> <span class="nav-text">One LR for all parameters</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Adaptive-LR-for-each-parameter"><span class="nav-number">2.2.</span> <span class="nav-text">Adaptive LR for each parameter</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cycling-Learning-Rate"><span class="nav-number">3.</span> <span class="nav-text">Cycling Learning Rate</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Why-it-works"><span class="nav-number">3.1.</span> <span class="nav-text">Why it works</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Epoch，iterations-cycles-and-stepsize"><span class="nav-number">3.1.1.</span> <span class="nav-text">Epoch，iterations, cycles and stepsize</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Calculating-the-LR"><span class="nav-number">3.2.</span> <span class="nav-text">Calculating the LR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deriving-the-optimal-base-lr-and-max-lr"><span class="nav-number">3.3.</span> <span class="nav-text">Deriving the optimal base lr and max lr</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Variants"><span class="nav-number">3.4.</span> <span class="nav-text">Variants</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Results"><span class="nav-number">3.5.</span> <span class="nav-text">Results</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Conclusion"><span class="nav-number">3.6.</span> <span class="nav-text">Conclusion</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#References"><span class="nav-number">3.7.</span> <span class="nav-text">References</span></a></li></ol></li></ol></div>
             
 
           </div>
