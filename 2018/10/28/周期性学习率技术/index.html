@@ -145,7 +145,7 @@
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-exp_range.png">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-cifar10.png">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-adam.png">
-<meta property="og:updated_time" content="2018-10-29T15:29:02.011Z">
+<meta property="og:updated_time" content="2018-10-30T14:25:09.279Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="周期性学习率(Cyclical Learning Rate)技术">
 <meta name="twitter:description" content="本文介绍神经网络训练中的周期性学习率技术。 Introduction学习率(learning_rate, LR)是神经网络训练过程中最重要的超参数之一，它对于快速、高效地训练神经网络至关重要。简单来说，LR决定了我们当前的权重参数朝着降低损失的方向上改变多少。 1new_weight = exsiting_weight - learning_rate * gradient  Fig.: A sim">
@@ -480,7 +480,7 @@
 <p><em><center>Fig.: A simple neural network where the w’s and b’s are to be learnt (Img Credit: Matt Mazur)</center></em></p>
 <p>这看上去很简单。但是正如许多研究显示的那样，单单通过提升这一步就会对我们的训练产生深远的影响，并且尚有很大的优化空间。</p>
 <p>本文介绍了一种叫做周期性学习率（CLR）的技术，它是一种非常新的、简单的想法，用来设置和控制训练过程中LR的大小。该技术在<a href="https://twitter.com/jeremyphoward" target="_blank" rel="noopener">jeremyphoward</a>今年的<a href="http://www.fast.ai/" target="_blank" rel="noopener">fast.ai course</a>课程中提及过。</p>
-<h2 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h2><p>神经网络用来完成某项任务需要对大量参数进行训练。参数训练意味着寻找合适的一些参数，使得在每个batch训练完成后损失（loss）达到最小。</p>
+<h2 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h2><p>神经网络用来完成某项任务需要对大量参数进行训练。参数训练意味着寻找合适的一些参数，使得在每个batch训练完成后损失（loss）达到最小，而参数更新的方式则与LR密切相关。</p>
 <p>通常来说，有两种广泛使用的方法用来设置训练过程中的LR。</p>
 <h3 id="One-LR-for-all-parameters"><a href="#One-LR-for-all-parameters" class="headerlink" title="One LR for all parameters"></a>One LR for all parameters</h3><p>一个典型的例子是<a href="https://en.wikipedia.org/wiki/Stochastic_gradient_descent" target="_blank" rel="noopener">SGD</a>， 在训练开始时设置一个LR常量，并且设定一个LR衰减策略（如step，exponential等）。这个单一的LR用来更新所有的参数。在每个epochs中，LR按预先设定随时间逐渐衰减，当我们临近最小损失时， 通过衰减可以减缓更新，以防止我们越过最小值。</p>
 <p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-learningrates.jpeg" alt="image text"></p>
@@ -490,7 +490,7 @@
 <li>难以选择初始的LR达到想要的效果（如上图所示）；</li>
 <li>LR衰减策略同样难以设定，他们很难自适应动态变化的数据；</li>
 <li>所有的参数使用相同的LR进行更新，而这些参数可能学习速率不完全相同；</li>
-<li>很容易陷入马鞍点不能自拔（下面会阐述）</li>
+<li>很容易陷入马鞍点不能自拔</li>
 </ol>
 <h3 id="Adaptive-LR-for-each-parameter"><a href="#Adaptive-LR-for-each-parameter" class="headerlink" title="Adaptive LR for each parameter"></a>Adaptive LR for each parameter</h3><p>一些改进的优化器如<em>AdaGrad</em>, <em>AdaDelta</em>, <em>RMSprop</em> and <em>Adam</em> 很大程度上缓解了上述困难，方法是对每个参数采用不同的自适应学习率。比如AdaDelta，它的更新机制甚至不需要我们主动设置默认的学习率。</p>
 <p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/%E8%87%AA%E9%80%82%E5%BA%94SGD%E6%96%B9%E6%B3%95.gif" alt="image text"></p>
@@ -532,7 +532,7 @@
 <p>可以看出，开始的时候，准确率随着学习率的增加而增加，然后进入平缓起期，然后又开始减小，出现震荡。注意图中准确率开始增长的那一点和达到平衡的那一点（图中红色箭头所示）。这两个点可以作为比较好的base lr 和 max lr。当然，你也可以选择平衡点旁边的准确率峰值点作为max lr， 把base lr 设为其1/3 或者1/4。</p>
 <p>好了，三个参数中已经有两个确定了，那么怎么确定stepsize呢？</p>
 <p>已经有论文做过实验，他们将stepsize设成一个epoch包含的iteration数量的2-10倍。拿我们之前举的例子来说，我们一个epoch包含500个iteration，那么stepsize就设成1000-5000。该论文实验表明，stepsize设成2倍或者10倍，两者结果并没有太大的不同。</p>
-<h3 id="Variants"><a href="#Variants" class="headerlink" title="Variants"></a>Variants</h3><p>上面我们实现的算法中，学习率是按照三角的规律周期性变化。除了这种以外，还有其他集中不同的函数形式。</p>
+<h3 id="Variants"><a href="#Variants" class="headerlink" title="Variants"></a>Variants</h3><p>上面我们实现的算法中，学习率是按照三角的规律周期性变化。除了这种以外，还有其他几种不同的函数形式。</p>
 <p><strong><em>traiangular2：</em></strong>这里max lr 按cycle进行对半衰减。</p>
 <p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-triangular2.png" alt="image text"></p>
 <p><em><center>Fig: Graph showing the variation of lr with iteration for the triangular2 approach (Img Credit: Brad Kenstler)</center></em></p>
@@ -860,26 +860,6 @@
 
 
         
-<div class="busuanzi-count">
-  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-  
-    <span class="site-uv">
-      访客数
-      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
-      
-    </span>
-  
-
-  
-    <span class="site-pv">
-      <i class="fa fa-eye">本站总访问量</i>
-      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
-      
-    </span>
-  
-</div>
-
 
 
 
