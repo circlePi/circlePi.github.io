@@ -113,7 +113,7 @@
 
 
 
-  <meta name="keywords" content="machine learning, deep learning">
+  <meta name="keywords" content=",,">
 
 
 
@@ -126,17 +126,18 @@
 
 
 
-<meta name="description" content="饮钱江水，恋皖南家">
-<meta name="keywords" content="machine learning, deep learning, nlp">
+<meta name="description" content="Introduction深度学习在翻译、问答、摘要等复杂的任务上通常有较好的表现，前提是我们拥有成千上万甚至百万量级的带有标签的训练集（以分类为例）。通常，深度学习模型需要大数据集来避免过拟合。但是假如我们只有少量的数据（比如几千条数据），我们如何使用深度学习模型来完成我们的任务呢？ 正则化正则化是机器学习模型内部用来避免过拟合的一种手段，具有很强的理论基础，并且具有通用性。 L1和L2正则L1和">
+<meta name="keywords" content="NLP,过拟合">
 <meta property="og:type" content="website">
-<meta property="og:title" content="circlepi&#39;s blog">
-<meta property="og:url" content="http://state-of-art.top/archives/2018/10/index.html">
+<meta property="og:title" content="如何在小的数据集上做NLP任务">
+<meta property="og:url" content="http://state-of-art.top/周期性学习率技术 (copy).html">
 <meta property="og:site_name" content="circlepi&#39;s blog">
-<meta property="og:description" content="饮钱江水，恋皖南家">
+<meta property="og:description" content="Introduction深度学习在翻译、问答、摘要等复杂的任务上通常有较好的表现，前提是我们拥有成千上万甚至百万量级的带有标签的训练集（以分类为例）。通常，深度学习模型需要大数据集来避免过拟合。但是假如我们只有少量的数据（比如几千条数据），我们如何使用深度学习模型来完成我们的任务呢？ 正则化正则化是机器学习模型内部用来避免过拟合的一种手段，具有很强的理论基础，并且具有通用性。 L1和L2正则L1和">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-18T11:59:14.637Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="circlepi&#39;s blog">
-<meta name="twitter:description" content="饮钱江水，恋皖南家">
+<meta name="twitter:title" content="如何在小的数据集上做NLP任务">
+<meta name="twitter:description" content="Introduction深度学习在翻译、问答、摘要等复杂的任务上通常有较好的表现，前提是我们拥有成千上万甚至百万量级的带有标签的训练集（以分类为例）。通常，深度学习模型需要大数据集来避免过拟合。但是假如我们只有少量的数据（比如几千条数据），我们如何使用深度学习模型来完成我们的任务呢？ 正则化正则化是机器学习模型内部用来避免过拟合的一种手段，具有很强的理论基础，并且具有通用性。 L1和L2正则L1和">
 
 
 
@@ -166,13 +167,13 @@
 
 
 
-  <link rel="canonical" href="http://state-of-art.top/archives/2018/10/">
+  <link rel="canonical" href="http://state-of-art.top/周期性学习率技术 (copy).html">
 
 
 
 
 
-  <title>归档 | circlepi's blog</title>
+  <title>如何在小的数据集上做NLP任务 | circlepi's blog</title>
   
 
 
@@ -191,7 +192,7 @@
     
   
 
-  <div class="container sidebar-position-left page-archive">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
@@ -328,107 +329,42 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
 
-      <span class="archive-page-counter">
-        
-        
-        
-          
-        
-        嗯..! 目前共计 4 篇日志。 继续努力。
-      </span>
+	<h1 class="post-title" itemprop="name headline">如何在小的数据集上做NLP任务</h1>
+
+
+
+</header>
 
       
-
+      
+      
+      <div class="post-body">
         
         
+          <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>深度学习在翻译、问答、摘要等复杂的任务上通常有较好的表现，前提是我们拥有成千上万甚至百万量级的带有标签的训练集（以分类为例）。通常，深度学习模型需要大数据集来避免过拟合。但是假如我们只有少量的数据（比如几千条数据），我们如何使用深度学习模型来完成我们的任务呢？</p>
+<h2 id="正则化"><a href="#正则化" class="headerlink" title="正则化"></a>正则化</h2><p>正则化是机器学习模型内部用来避免过拟合的一种手段，具有很强的理论基础，并且具有通用性。</p>
+<h3 id="L1和L2正则"><a href="#L1和L2正则" class="headerlink" title="L1和L2正则"></a>L1和L2正则</h3><p>L1和L2正则可能是最经典的正则化方式，在许多机器学习模型中使用过。这种方法增加权重项到我们模型的损失函数里。通过这种方式，模型会尽量让权重保持很小，对于一些对模型帮助不是很大的特征的权重，将会被正则化到0。</p>
+<p>下面一段代码展示了L2正则的使用（with tensorflow）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">loss_fn</span><span class="params">(self, inputs, target, training)</span>:</span></span><br><span class="line">    preds = self(inputs, training)</span><br><span class="line">    <span class="comment"># L2正则化</span></span><br><span class="line">    loss_L2 = tf.add_n([tf.nn.l2_loss(v)</span><br><span class="line">                        <span class="keyword">for</span> v <span class="keyword">in</span> self.trainable_variables</span><br><span class="line">                        <span class="keyword">if</span> <span class="string">'bias'</span> <span class="keyword">not</span> <span class="keyword">in</span> v.name]) * <span class="number">0.001</span></span><br><span class="line">    loss = tf.losses.sparse_softmax_cross_entropy(labels=target, logits=preds)</span><br><span class="line">    loss = loss + loss_L2</span><br><span class="line">    <span class="keyword">return</span> loss</span><br></pre></td></tr></table></figure>
+<h3 id="Dropout"><a href="#Dropout" class="headerlink" title="Dropout"></a>Dropout</h3><p>Dropout是一种近年随着神经网络发展引入的新的正则化方法。在训练时，网络中的神经元会以一定概率P被drop(即权重被置为0)。这种方式使得网络不会依赖于某个特定的神经元或者依赖于某些神经元之间的特定的关系，而必须去学习网络中不同部分的每个模式（或者说规律），使模型找到真正重要的模式，从而得到更好的泛化效果。</p>
+<h3 id="Early-stopping"><a href="#Early-stopping" class="headerlink" title="Early stopping"></a>Early stopping</h3>
         
-
-        
-          
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2018">2018</h1>
-          </div>
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/10/28/周期性学习率技术/" itemprop="url">
-              
-                <span itemprop="name">周期性学习率(Cyclical Learning Rate)技术</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2018-10-28T23:21:08+08:00" content="2018-10-28">
-          10-28
-        </time>
       </div>
-
-    </header>
-  </article>
-
-
-
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/10/27/TFrecord在动态图中的使用/" itemprop="url">
-              
-                <span itemprop="name">图像数据-TFrecord在动态图中的使用</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2018-10-27T23:21:08+08:00" content="2018-10-27">
-          10-27
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
       
-
+      
     </div>
+    
+    
+    
   </div>
-  
-  
-  
-
-  
-
 
 
           </div>
@@ -436,6 +372,13 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
 
         </div>
         
@@ -456,8 +399,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -568,6 +520,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正则化"><span class="nav-number">2.</span> <span class="nav-text">正则化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#L1和L2正则"><span class="nav-number">2.1.</span> <span class="nav-text">L1和L2正则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dropout"><span class="nav-number">2.2.</span> <span class="nav-text">Dropout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Early-stopping"><span class="nav-number">2.3.</span> <span class="nav-text">Early stopping</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -720,6 +688,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
