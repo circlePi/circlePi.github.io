@@ -135,7 +135,7 @@
 <meta property="og:description" content="Introduction本文主要介绍如何使用Torchtext读取文本数据集。 Torchtext是非官方的、一种为pytorch提供文本数据处理能力的库， 类似于图像处理库Torchvision。 Install 下载地址：https://github.com/text 安装：pip install text-master.zip 测试安装是否成功： import torchtext  How">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/20181128/1.png">
-<meta property="og:updated_time" content="2018-11-28T14:06:28.357Z">
+<meta property="og:updated_time" content="2018-11-28T14:15:32.838Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="torchtext读取文本数据集">
 <meta name="twitter:description" content="Introduction本文主要介绍如何使用Torchtext读取文本数据集。 Torchtext是非官方的、一种为pytorch提供文本数据处理能力的库， 类似于图像处理库Torchvision。 Install 下载地址：https://github.com/text 安装：pip install text-master.zip 测试安装是否成功： import torchtext  How">
@@ -483,8 +483,8 @@
 <p>Example: 用来表示一个样本，通常为“数据+标签”</p>
 <p>TabularDataset: 用来从文件中读取数据，生成Dataset， Dataset是Example实例的集合</p>
 <p>BucketIterator：迭代器，用来生成batch， 类似的有Iterator，Buckeiterator的功能较强大点，支持排序，动态padding等</p>
-<h3 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h3><p>见我上篇博文&lt;NLP文本预处理&gt;。使用生成的train.tsv和valid.tsv。</p>
-<h3 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h3><h4 id="创建Field对象"><a href="#创建Field对象" class="headerlink" title="创建Field对象"></a>创建Field对象</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">x_tokenize</span><span class="params">(x)</span>:</span></span><br><span class="line">    <span class="comment"># 如果加载进来的是已经转成id的文本</span></span><br><span class="line">    <span class="comment"># 此处必须将字符串转换成整型</span></span><br><span class="line">    <span class="comment"># 否则必须将use_vocab设为True</span></span><br><span class="line">    <span class="keyword">return</span> [int(c) <span class="keyword">for</span> c <span class="keyword">in</span> x.split()]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">y_tokenize</span><span class="params">(y)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> int(y)</span><br><span class="line"></span><br><span class="line">TEXT = Field(sequential=<span class="keyword">True</span>, tokenize=x_tokenize,</span><br><span class="line">                     use_vocab=<span class="keyword">False</span>, batch_first=<span class="keyword">True</span>,</span><br><span class="line">                     fix_length=self.fix_length, </span><br><span class="line">                     eos_token=<span class="keyword">None</span>, init_token=<span class="keyword">None</span>,</span><br><span class="line">                     include_lengths=<span class="keyword">True</span>, pad_token=<span class="number">0</span>)</span><br><span class="line">        LABEL = Field(sequential=<span class="keyword">False</span>, tokenize=y_tokenize, use_vocab=<span class="keyword">False</span>, batch_first=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h3><p>见我上篇博文&lt;文本预处理&gt;。使用生成的train.tsv和valid.tsv。</p>
+<h3 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h3><h4 id="创建Field对象"><a href="#创建Field对象" class="headerlink" title="创建Field对象"></a>创建Field对象</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">x_tokenize</span><span class="params">(x)</span>:</span></span><br><span class="line">    <span class="comment"># 如果加载进来的是已经转成id的文本</span></span><br><span class="line">    <span class="comment"># 此处必须将字符串转换成整型</span></span><br><span class="line">    <span class="comment"># 否则必须将use_vocab设为True</span></span><br><span class="line">    <span class="keyword">return</span> [int(c) <span class="keyword">for</span> c <span class="keyword">in</span> x.split()]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">y_tokenize</span><span class="params">(y)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> int(y)</span><br><span class="line"></span><br><span class="line">TEXT = Field(sequential=<span class="keyword">True</span>, tokenize=x_tokenize,</span><br><span class="line">                     use_vocab=<span class="keyword">False</span>, batch_first=<span class="keyword">True</span>,</span><br><span class="line">                     fix_length=self.fix_length, </span><br><span class="line">                     eos_token=<span class="keyword">None</span>, init_token=<span class="keyword">None</span>,</span><br><span class="line">                     include_lengths=<span class="keyword">True</span>, pad_token=<span class="number">0</span>)</span><br><span class="line">LABEL = Field(sequential=<span class="keyword">False</span>, tokenize=y_tokenize, use_vocab=<span class="keyword">False</span>, batch_first=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure>
 <h5 id="参数说明"><a href="#参数说明" class="headerlink" title="参数说明"></a>参数说明</h5><ul>
 <li>sequential     类型boolean,  作用：是否为序列，一般文本都为True，标签为False</li>
 <li>tokenize    类型: function， 作用: 文本处理，默认为str.split(), 这里对x和y分别自定义了处理函数。</li>
@@ -568,8 +568,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/11/28/文本预处理/" rel="next" title="torchtext读取文本数据集">
-                <i class="fa fa-chevron-left"></i> torchtext读取文本数据集
+              <a href="/2018/11/28/文本预处理/" rel="next" title="文本预处理">
+                <i class="fa fa-chevron-left"></i> 文本预处理
               </a>
             
           </div>
@@ -814,7 +814,7 @@
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count">博客全站共7.3k字</span>
+  <span class="post-count">博客全站共7.2k字</span>
 </div>
 
 <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1275169677'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s13.cnzz.com/z_stat.php%3Fid%3D1275169677%26show%3Dpic2' type='text/javascript'%3E%3C/script%3E"));</script>
