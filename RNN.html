@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#fff">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.lug.ustc.edu.cn/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Damion:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#fff">
+
+
+
+
+
+  <meta name="keywords" content="machine learning, deep learning">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="circlepi's blog" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="Introduction本文介绍pytorch RNN网络搭建，主要包括LSTM和GRU的使用。 最近从tensorflow入坑pytorch，发现两者的RNN模块前向传播有些不同。特别是RNN中的pack_padded_sequence和pad_packed_sequence。 Backgroundtensorflow的BILSTM以BILSTM为例，tensorflow中我们一般这样操作：">
+<meta name="keywords" content="machine learning, deep learning, nlp">
+<meta property="og:type" content="website">
+<meta property="og:title" content="circlepi&#39;s blog">
+<meta property="og:url" content="http://state-of-art.top/RNN.html">
+<meta property="og:site_name" content="circlepi&#39;s blog">
+<meta property="og:description" content="Introduction本文介绍pytorch RNN网络搭建，主要包括LSTM和GRU的使用。 最近从tensorflow入坑pytorch，发现两者的RNN模块前向传播有些不同。特别是RNN中的pack_padded_sequence和pad_packed_sequence。 Backgroundtensorflow的BILSTM以BILSTM为例，tensorflow中我们一般这样操作：">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-30T20:10:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="circlepi&#39;s blog">
+<meta name="twitter:description" content="Introduction本文介绍pytorch RNN网络搭建，主要包括LSTM和GRU的使用。 最近从tensorflow入坑pytorch，发现两者的RNN模块前向传播有些不同。特别是RNN中的pack_padded_sequence和pad_packed_sequence。 Backgroundtensorflow的BILSTM以BILSTM为例，tensorflow中我们一般这样操作：">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://state-of-art.top/RNN.html">
+
+
+
+
+
+  <title> | circlepi's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">circlepi's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Even with an intractable probelm, one can find a way to do the right thing.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+<script type="text/javascript" src="/lib/zclip/clipboard.js"></script>	
+<script type="text/javascript" src="/js/src/custom.js"></script>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+	<h1 class="post-title" itemprop="name headline"></h1>
+
+
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>本文介绍pytorch RNN网络搭建，主要包括LSTM和GRU的使用。</p>
+<p>最近从tensorflow入坑pytorch，发现两者的RNN模块前向传播有些不同。特别是RNN中的pack_padded_sequence和pad_packed_sequence。</p>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><h3 id="tensorflow的BILSTM"><a href="#tensorflow的BILSTM" class="headerlink" title="tensorflow的BILSTM"></a>tensorflow的BILSTM</h3><p>以BILSTM为例，tensorflow中我们一般这样操作：</p>
+<ul>
+<li><p>先定义个前向层</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.fw_cell = tf.nn.rnn_cell.LSTMCell(num_units=cell_size)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在定义一个后向层</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.bw_cell = tf.nn.rnn_cell.LSTMCell(num_units=cell_size)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>然后前向传播是这个样子的</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs, seq_length, training)</span>:</span></span><br><span class="line">       <span class="comment"># 嵌入层</span></span><br><span class="line">       embedded_words = self.embeddings(inputs)</span><br><span class="line">       <span class="comment"># RNN层</span></span><br><span class="line">       outputs, final_state = tf.nn.bidirectional_dynamic_rnn(</span><br><span class="line">           self.fw_cell,</span><br><span class="line">           self.bw_cell,</span><br><span class="line">           inputs=embedded_words, </span><br><span class="line">           <span class="comment"># 句子原始长度（batch_size，1）</span></span><br><span class="line">           sequence_length=seq_length, </span><br><span class="line">           dtype=tf.float32,</span><br><span class="line">           time_major=<span class="keyword">False</span>)</span><br><span class="line">       <span class="comment"># 合并前后向的结果</span></span><br><span class="line">       <span class="comment"># outputs是一个列表:[（batch_size, cell_size）,(...)]</span></span><br><span class="line">       <span class="comment"># len(output) = time_steps</span></span><br><span class="line">       outputs = tf.concat(outputs, axis=<span class="number">2</span>)</span><br><span class="line">       <span class="comment"># 由于采用的是dynamic_rnn，padding部分自动被截断了</span></span><br><span class="line">       <span class="comment"># 这里取最后一维就好了</span></span><br><span class="line">       final_output = outputs[<span class="number">-1</span>]</span><br><span class="line">       logits = self.Dense(final_output)</span><br><span class="line">       <span class="keyword">return</span> logits</span><br></pre></td></tr></table></figure>
+<p>可以看到，tensorflow的<em>dynamic</em> LSTM有两个特点：</p>
+<ul>
+<li>前向传播时，不看词向量维度的话，输入是个二维（batch_size, time_steps)</li>
+<li>padding部分不参与计算，会被自动截断</li>
+</ul>
+<p><em>with this in our mind</em>, <em>let‘s see what’s the bilstm in pytorch。</em></p>
+<h2 id="Pytorch-BILSTM"><a href="#Pytorch-BILSTM" class="headerlink" title="Pytorch BILSTM"></a>Pytorch BILSTM</h2><h3 id="LSTM定义"><a href="#LSTM定义" class="headerlink" title="LSTM定义"></a>LSTM定义</h3><p>一般这样操作：</p>
+<ul>
+<li><p>先定义个LSTM</p>
+</li>
+<li><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">self.rnn_cell = nn.LSTM(input_size=word_embedding_dimension,</span><br><span class="line">                                    hidden_size=hidden_size,</span><br><span class="line">                                    num_layers=num_layer,</span><br><span class="line">                                    batch_first=<span class="keyword">True</span>,</span><br><span class="line">                                    bidirectional=bi_flag)</span><br></pre></td></tr></table></figure>
+<p>双向的怎么办呢, 改个参数就行了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bidirectional=<span class="keyword">True</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>多层呢</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">num_layers=<span class="keyword">True</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>可以看到，pytorch的LSTM把所有的功能整合到一起了，不需要定义前向后向（当然我们也可以搞两个单向的）。此外，我们除了要传递隐藏层的个数cell_size, 还需要将词向量的维度传递进来，这是为什么呢？</p>
+<p>这还不是关键。关键在于pytorch的动态padding机制。因为我们一般是将输入作为batch传进来的，对于变长的文本来说，padding是不可避免的。但是在我们使用LSTM进行计算时，是不希望padding部分参与计算的（他们不是真实的文本，假如纳入计算，会引入不必要的噪声和不必要的计算量）。tensorflow采用dynamic LSTM很好地解决了这一问题。pytorch当然也有他自己的一套，下面来看看。</p>
+<h3 id="pack-padded-sequence"><a href="#pack-padded-sequence" class="headerlink" title="pack_padded_sequence"></a>pack_padded_sequence</h3><p>我们从embedding层拿到的输入维度为（batch_size, time_steps, word_embedding_dimension）, 并不将他直接喂给LSTM，而是要预加工一下，这时候第一个重要的函数pack_padded_sequence就登场了，可以将其看成一个截断函数，作用就是将padding部分截断。不仅如此，阶段后会将输入拉平，变成（batch_size*time_steps, word_embedding_dimension）, 仔细看一下，降了一个维度。来看实例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pack_padded_sequence </span><br><span class="line"><span class="comment"># 手动造个张量, 包含3个序列，长度分别为10,5,3，使用0进行padding</span></span><br><span class="line">x = torch.FloatTensor([[[<span class="number">1</span>],[<span class="number">2</span>],[<span class="number">3</span>],[<span class="number">4</span>],[<span class="number">5</span>],[<span class="number">6</span>],[<span class="number">7</span>],[<span class="number">8</span>],[<span class="number">8</span>],[<span class="number">9</span>]],[[<span class="number">1</span>], [<span class="number">2</span>],[<span class="number">3</span>],[<span class="number">4</span>],[<span class="number">5</span>],[<span class="number">0</span>],[<span class="number">0</span>],[<span class="number">0</span>],[<span class="number">0</span>],[<span class="number">0</span>]],[[<span class="number">5</span>],[<span class="number">4</span>],[<span class="number">6</span>],[<span class="number">0</span>],[<span class="number">0</span>],[<span class="number">0</span>],[<span class="number">0</span>],[<span class="number">0</span>],[<span class="number">0</span>],[<span class="number">0</span>]]])</span><br><span class="line">print(<span class="string">"x shape is："</span>, x.shape)</span><br><span class="line"><span class="comment"># x 的真实长度</span></span><br><span class="line">length = torch.LongTensor([<span class="number">10</span>, <span class="number">5</span>,<span class="number">3</span>])</span><br><span class="line">x_packed = pack_padded_sequence(x, length,batch_first=<span class="keyword">True</span>)</span><br><span class="line">print(x_packed)</span><br></pre></td></tr></table></figure>
+<p>结果为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">x shape <span class="keyword">is</span>：（<span class="number">3</span>，<span class="number">10</span>，<span class="number">1</span>）</span><br><span class="line">PackedSequence(data=tensor([[<span class="number">1.</span>],</span><br><span class="line">        [<span class="number">1.</span>],</span><br><span class="line">        [<span class="number">5.</span>],</span><br><span class="line">        [<span class="number">2.</span>],</span><br><span class="line">        [<span class="number">2.</span>],</span><br><span class="line">        [<span class="number">4.</span>],</span><br><span class="line">        [<span class="number">3.</span>],</span><br><span class="line">        [<span class="number">3.</span>],</span><br><span class="line">        [<span class="number">6.</span>],</span><br><span class="line">        [<span class="number">4.</span>],</span><br><span class="line">        [<span class="number">4.</span>],</span><br><span class="line">        [<span class="number">5.</span>],</span><br><span class="line">        [<span class="number">5.</span>],</span><br><span class="line">        [<span class="number">6.</span>],</span><br><span class="line">        [<span class="number">7.</span>],</span><br><span class="line">        [<span class="number">8.</span>],</span><br><span class="line">        [<span class="number">8.</span>],</span><br><span class="line">        [<span class="number">9.</span>]]), batch_sizes=tensor([<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]))</span><br></pre></td></tr></table></figure>
+<p>这里有几点要说一下：</p>
+<ul>
+<li>输入的张量是已经按照长度排序的！这是必须的，否则pack_padded_sequence函数会报错！一般而言排序有两种做法，一是使用torch.sort函数，第二是在构造batch时使用torchtext进行batch内排序，见我上篇博文</li>
+<li>经过pack，输入发生了三个变化。一是由三维变成了2维(18,1)，二是padding部分的0没有了，三是对序列进行了拼接，这其实是维度降低的结果</li>
+<li>pack完之后的结果是个tuple，tuple[0]是数据，是按列进行拼接的，tuple[1]是batch_size, 跟我们之前的batch_size是不一样的，这是为了我们后面可以还原</li>
+</ul>
+<p>好了，现在pddding问题解决了，我们将它输入进LSTM，前向传播是这样的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, inputs, length)</span>:</span></span><br><span class="line">    <span class="string">"""前向传播"""</span></span><br><span class="line">    embeddings = self.embedding(inputs, length)  <span class="comment"># (batch_size, time_steps, embedding_dim)</span></span><br><span class="line">    <span class="comment"># 去除padding元素</span></span><br><span class="line">    <span class="comment"># embeddings_packed: (batch_size*time_steps, embedding_dim)</span></span><br><span class="line">    embeddings_packed = pack_padded_sequence(embeddings, length, batch_first=<span class="keyword">True</span>)</span><br><span class="line">    output, (h_n, c_n) = self.rnn_cell(embeddings_packed, (h_0, c_0))</span><br><span class="line">    <span class="comment"># padded_output: (batch_size, time_steps, hidden_size * bi_num)</span></span><br><span class="line">    <span class="comment"># h_n|c_n: (num_layer*bi_num, batch_size, hidden_size)</span></span><br><span class="line">    padded_output, length = pad_packed_sequence(output, batch_first=<span class="keyword">True</span>)</span><br><span class="line">    <span class="comment"># 取最后一个有效输出作为最终输出（0为无效输出）</span></span><br><span class="line">    last_output = padded_output[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+<p>这里做下参数说明：</p>
+<ul>
+<li>batch_first    类型：bool， True，输入的维度为（batch_size，time_steps, word_embedding_dimension）；False，输入维度为（time_steps, batch_size, word_embedding_dimension）</li>
+<li>h_0: 初始化隐藏态</li>
+<li>c_0: 初始化细胞态</li>
+<li>output：输出，为一个tuple，后面会用例子说明</li>
+<li>h_n: 最后个隐藏态</li>
+<li>c_n: 最后个细胞态</li>
+</ul>
+<p>还是以上面我们造的那个张量为例，看下输出：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"></span><br><span class="line">birnn = nn.LSTM(input_size=<span class="number">1</span>, hidden_size=<span class="number">8</span>, bidirectional=<span class="keyword">True</span>)</span><br><span class="line">output, (h_n, c_n) = birnn(x_packed)</span><br><span class="line">print(<span class="string">'output:\n'</span>, output)</span><br><span class="line">print(<span class="string">'h_n shape:\n'</span>,h_n.shape)</span><br><span class="line">print(<span class="string">'c_n shape:\n'</span>,c_n.shape)</span><br></pre></td></tr></table></figure>
+<p>结果为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">output:</span><br><span class="line"> PackedSequence(data=tensor([[<span class="number">-0.0087</span>,  <span class="number">0.0716</span>,  <span class="number">0.0069</span>, <span class="number">-0.0040</span>, <span class="number">-0.1375</span>,  <span class="number">0.0404</span>,  <span class="number">0.0757</span>,  <span class="number">0.0291</span>,</span><br><span class="line">          <span class="number">0.0619</span>,  <span class="number">0.0213</span>,  <span class="number">0.1517</span>,  <span class="number">0.0241</span>,  <span class="number">0.2986</span>, <span class="number">-0.2594</span>, <span class="number">-0.1432</span>, <span class="number">-0.1742</span>],</span><br><span class="line">        [<span class="number">-0.0087</span>,  <span class="number">0.0716</span>,  <span class="number">0.0069</span>, <span class="number">-0.0040</span>, <span class="number">-0.1375</span>,  <span class="number">0.0404</span>,  <span class="number">0.0757</span>,  <span class="number">0.0291</span>,</span><br><span class="line">          <span class="number">0.0486</span>,  <span class="number">0.0195</span>,  <span class="number">0.1454</span>,  <span class="number">0.0138</span>,  <span class="number">0.2596</span>, <span class="number">-0.2467</span>, <span class="number">-0.1491</span>, <span class="number">-0.1596</span>],</span><br><span class="line">        [<span class="number">-0.1019</span>,  <span class="number">0.1606</span>, <span class="number">-0.0482</span>, <span class="number">-0.0519</span>, <span class="number">-0.1932</span>,  <span class="number">0.2632</span>, <span class="number">-0.0423</span>,  <span class="number">0.0774</span>,</span><br><span class="line">          <span class="number">0.0434</span>,  <span class="number">0.0142</span>,  <span class="number">0.0915</span>, <span class="number">-0.0455</span>,  <span class="number">0.2970</span>, <span class="number">-0.6665</span>, <span class="number">-0.0578</span>, <span class="number">-0.0521</span>],</span><br><span class="line">        [<span class="number">-0.0895</span>,  <span class="number">0.1504</span>, <span class="number">-0.0069</span>, <span class="number">-0.0137</span>, <span class="number">-0.2248</span>,  <span class="number">0.1365</span>,  <span class="number">0.1002</span>,  <span class="number">0.0918</span>,</span><br><span class="line">          <span class="number">0.0730</span>,  <span class="number">0.0247</span>,  <span class="number">0.1526</span>,  <span class="number">0.0160</span>,  <span class="number">0.3559</span>, <span class="number">-0.4301</span>, <span class="number">-0.1375</span>, <span class="number">-0.1429</span>],</span><br><span class="line">        [<span class="number">-0.0895</span>,  <span class="number">0.1504</span>, <span class="number">-0.0069</span>, <span class="number">-0.0137</span>, <span class="number">-0.2248</span>,  <span class="number">0.1365</span>,  <span class="number">0.1002</span>,  <span class="number">0.0918</span>,</span><br><span class="line">          <span class="number">0.0517</span>,  <span class="number">0.0197</span>,  <span class="number">0.1431</span>, <span class="number">-0.0005</span>,  <span class="number">0.2929</span>, <span class="number">-0.4016</span>, <span class="number">-0.1401</span>, <span class="number">-0.1218</span>],</span><br><span class="line">        [<span class="number">-0.1855</span>,  <span class="number">0.2300</span>, <span class="number">-0.0625</span>, <span class="number">-0.0508</span>, <span class="number">-0.2488</span>,  <span class="number">0.2741</span>, <span class="number">-0.0638</span>,  <span class="number">0.1441</span>,</span><br><span class="line">          <span class="number">0.0239</span>,  <span class="number">0.0137</span>,  <span class="number">0.0786</span>, <span class="number">-0.0524</span>,  <span class="number">0.2311</span>, <span class="number">-0.5685</span>, <span class="number">-0.0673</span>, <span class="number">-0.0485</span>],</span><br><span class="line">        [<span class="number">-0.1621</span>,  <span class="number">0.2254</span>, <span class="number">-0.0318</span>, <span class="number">-0.0240</span>, <span class="number">-0.2693</span>,  <span class="number">0.2207</span>,  <span class="number">0.0843</span>,  <span class="number">0.1487</span>,</span><br><span class="line">          <span class="number">0.0789</span>,  <span class="number">0.0259</span>,  <span class="number">0.1354</span>,  <span class="number">0.0050</span>,  <span class="number">0.3851</span>, <span class="number">-0.5676</span>, <span class="number">-0.1110</span>, <span class="number">-0.1117</span>],</span><br><span class="line">        [<span class="number">-0.1621</span>,  <span class="number">0.2254</span>, <span class="number">-0.0318</span>, <span class="number">-0.0240</span>, <span class="number">-0.2693</span>,  <span class="number">0.2207</span>,  <span class="number">0.0843</span>,  <span class="number">0.1487</span>,</span><br><span class="line">          <span class="number">0.0439</span>,  <span class="number">0.0172</span>,  <span class="number">0.1198</span>, <span class="number">-0.0221</span>,  <span class="number">0.2856</span>, <span class="number">-0.5105</span>, <span class="number">-0.1089</span>, <span class="number">-0.0852</span>],</span><br><span class="line">        [<span class="number">-0.1346</span>,  <span class="number">0.3093</span>, <span class="number">-0.0775</span>, <span class="number">-0.0678</span>, <span class="number">-0.2616</span>,  <span class="number">0.2946</span>, <span class="number">-0.1167</span>,  <span class="number">0.1699</span>,</span><br><span class="line">         <span class="number">-0.0280</span>,  <span class="number">0.0067</span>,  <span class="number">0.0333</span>, <span class="number">-0.0924</span>,  <span class="number">0.1308</span>, <span class="number">-0.5332</span>, <span class="number">-0.0237</span>, <span class="number">-0.0201</span>],</span><br><span class="line">        [<span class="number">-0.1886</span>,  <span class="number">0.2883</span>, <span class="number">-0.0563</span>, <span class="number">-0.0352</span>, <span class="number">-0.2872</span>,  <span class="number">0.2700</span>,  <span class="number">0.0431</span>,  <span class="number">0.1887</span>,</span><br><span class="line">          <span class="number">0.0803</span>,  <span class="number">0.0254</span>,  <span class="number">0.1112</span>, <span class="number">-0.0077</span>,  <span class="number">0.3929</span>, <span class="number">-0.6681</span>, <span class="number">-0.0804</span>, <span class="number">-0.0828</span>],</span><br><span class="line">        [<span class="number">-0.1886</span>,  <span class="number">0.2883</span>, <span class="number">-0.0563</span>, <span class="number">-0.0352</span>, <span class="number">-0.2872</span>,  <span class="number">0.2700</span>,  <span class="number">0.0431</span>,  <span class="number">0.1887</span>,</span><br><span class="line">          <span class="number">0.0194</span>,  <span class="number">0.0129</span>,  <span class="number">0.0852</span>, <span class="number">-0.0521</span>,  <span class="number">0.2364</span>, <span class="number">-0.5524</span>, <span class="number">-0.0720</span>, <span class="number">-0.0538</span>],</span><br><span class="line">        [<span class="number">-0.1767</span>,  <span class="number">0.3363</span>, <span class="number">-0.0719</span>, <span class="number">-0.0475</span>, <span class="number">-0.2858</span>,  <span class="number">0.2911</span>, <span class="number">-0.0109</span>,  <span class="number">0.2141</span>,</span><br><span class="line">          <span class="number">0.0779</span>,  <span class="number">0.0234</span>,  <span class="number">0.0866</span>, <span class="number">-0.0215</span>,  <span class="number">0.3831</span>, <span class="number">-0.7393</span>, <span class="number">-0.0539</span>, <span class="number">-0.0580</span>],</span><br><span class="line">        [<span class="number">-0.1767</span>,  <span class="number">0.3363</span>, <span class="number">-0.0719</span>, <span class="number">-0.0475</span>, <span class="number">-0.2858</span>,  <span class="number">0.2911</span>, <span class="number">-0.0109</span>,  <span class="number">0.2141</span>,</span><br><span class="line">         <span class="number">-0.0274</span>,  <span class="number">0.0076</span>,  <span class="number">0.0448</span>, <span class="number">-0.0817</span>,  <span class="number">0.1408</span>, <span class="number">-0.4683</span>, <span class="number">-0.0382</span>, <span class="number">-0.0285</span>],</span><br><span class="line">        [<span class="number">-0.1470</span>,  <span class="number">0.3710</span>, <span class="number">-0.0771</span>, <span class="number">-0.0605</span>, <span class="number">-0.2693</span>,  <span class="number">0.2962</span>, <span class="number">-0.0684</span>,  <span class="number">0.2291</span>,</span><br><span class="line">          <span class="number">0.0724</span>,  <span class="number">0.0204</span>,  <span class="number">0.0651</span>, <span class="number">-0.0356</span>,  <span class="number">0.3568</span>, <span class="number">-0.7885</span>, <span class="number">-0.0341</span>, <span class="number">-0.0385</span>],</span><br><span class="line">        [<span class="number">-0.1142</span>,  <span class="number">0.3956</span>, <span class="number">-0.0744</span>, <span class="number">-0.0727</span>, <span class="number">-0.2434</span>,  <span class="number">0.2935</span>, <span class="number">-0.1226</span>,  <span class="number">0.2366</span>,</span><br><span class="line">          <span class="number">0.0636</span>,  <span class="number">0.0164</span>,  <span class="number">0.0477</span>, <span class="number">-0.0497</span>,  <span class="number">0.3136</span>, <span class="number">-0.8199</span>, <span class="number">-0.0208</span>, <span class="number">-0.0245</span>],</span><br><span class="line">        [<span class="number">-0.0854</span>,  <span class="number">0.4126</span>, <span class="number">-0.0669</span>, <span class="number">-0.0829</span>, <span class="number">-0.2140</span>,  <span class="number">0.2871</span>, <span class="number">-0.1699</span>,  <span class="number">0.2389</span>,</span><br><span class="line">          <span class="number">0.0496</span>,  <span class="number">0.0118</span>,  <span class="number">0.0343</span>, <span class="number">-0.0641</span>,  <span class="number">0.2542</span>, <span class="number">-0.8307</span>, <span class="number">-0.0124</span>, <span class="number">-0.0151</span>],</span><br><span class="line">        [<span class="number">-0.0847</span>,  <span class="number">0.4176</span>, <span class="number">-0.0620</span>, <span class="number">-0.0877</span>, <span class="number">-0.2053</span>,  <span class="number">0.2863</span>, <span class="number">-0.2063</span>,  <span class="number">0.2468</span>,</span><br><span class="line">          <span class="number">0.0281</span>,  <span class="number">0.0090</span>,  <span class="number">0.0254</span>, <span class="number">-0.0784</span>,  <span class="number">0.1827</span>, <span class="number">-0.7871</span>, <span class="number">-0.0100</span>, <span class="number">-0.0116</span>],</span><br><span class="line">        [<span class="number">-0.0620</span>,  <span class="number">0.4284</span>, <span class="number">-0.0550</span>, <span class="number">-0.0931</span>, <span class="number">-0.1827</span>,  <span class="number">0.2785</span>, <span class="number">-0.2409</span>,  <span class="number">0.2438</span>,</span><br><span class="line">         <span class="number">-0.0278</span>,  <span class="number">0.0044</span>,  <span class="number">0.0120</span>, <span class="number">-0.1073</span>,  <span class="number">0.0924</span>, <span class="number">-0.6543</span>, <span class="number">-0.0047</span>, <span class="number">-0.0063</span>]],</span><br><span class="line">       grad_fn=&lt;CatBackward&gt;), batch_sizes=tensor([<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]))</span><br><span class="line"></span><br><span class="line">h_n shape:</span><br><span class="line"> torch.Size([<span class="number">2</span>, <span class="number">3</span>, <span class="number">8</span>])</span><br><span class="line">c_n shape:</span><br><span class="line"> torch.Size([<span class="number">2</span>, <span class="number">3</span>, <span class="number">8</span>])</span><br></pre></td></tr></table></figure>
+<p>output由一个tuple组成，第一个元素就是输出，这里的维度为torch.Size([18, 16])，第二个元素和我们之前pack时的batch_size参数一样。</p>
+<p>h_n和c_n分别为两个三维张量，维度如上，因为是双向，第一维为2.</p>
+<p>到这里是不是就结束了呢，当然不是，pack完了之后经过LSTM输出了结果，看上去很费劲，因为序列连一起了，batch都没了。所以我们还原，这时候就用到pack_padded_sequence的好基友pad_packed_sequence了。</p>
+<h3 id="pad-packed-sequence"><a href="#pad-packed-sequence" class="headerlink" title="pad_packed_sequence"></a>pad_packed_sequence</h3><p>pad_packed_sequence可以看成是解压缩操作。从上面可以看到，h_n, c_n已经是正常维度的张量了，没有pack，当然也用不着pad。我们只需对output做pad。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">padded_output, length = pad_packed_sequence(output, batch_first=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">print(<span class="string">'padded_output\n'</span>, padded_output)</span><br><span class="line">print(<span class="string">'padded_output shape\n'</span>, padded_output.shape)</span><br><span class="line">print(<span class="string">'length\n'</span>,length)</span><br></pre></td></tr></table></figure>
+<p>结果为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line">padded_output</span><br><span class="line"> tensor([[[<span class="number">-0.0087</span>,  <span class="number">0.0716</span>,  <span class="number">0.0069</span>, <span class="number">-0.0040</span>, <span class="number">-0.1375</span>,  <span class="number">0.0404</span>,  <span class="number">0.0757</span>,</span><br><span class="line">           <span class="number">0.0291</span>,  <span class="number">0.0619</span>,  <span class="number">0.0213</span>,  <span class="number">0.1517</span>,  <span class="number">0.0241</span>,  <span class="number">0.2986</span>, <span class="number">-0.2594</span>,</span><br><span class="line">          <span class="number">-0.1432</span>, <span class="number">-0.1742</span>],</span><br><span class="line">         [<span class="number">-0.0895</span>,  <span class="number">0.1504</span>, <span class="number">-0.0069</span>, <span class="number">-0.0137</span>, <span class="number">-0.2248</span>,  <span class="number">0.1365</span>,  <span class="number">0.1002</span>,</span><br><span class="line">           <span class="number">0.0918</span>,  <span class="number">0.0730</span>,  <span class="number">0.0247</span>,  <span class="number">0.1526</span>,  <span class="number">0.0160</span>,  <span class="number">0.3559</span>, <span class="number">-0.4301</span>,</span><br><span class="line">          <span class="number">-0.1375</span>, <span class="number">-0.1429</span>],</span><br><span class="line">         [<span class="number">-0.1621</span>,  <span class="number">0.2254</span>, <span class="number">-0.0318</span>, <span class="number">-0.0240</span>, <span class="number">-0.2693</span>,  <span class="number">0.2207</span>,  <span class="number">0.0843</span>,</span><br><span class="line">           <span class="number">0.1487</span>,  <span class="number">0.0789</span>,  <span class="number">0.0259</span>,  <span class="number">0.1354</span>,  <span class="number">0.0050</span>,  <span class="number">0.3851</span>, <span class="number">-0.5676</span>,</span><br><span class="line">          <span class="number">-0.1110</span>, <span class="number">-0.1117</span>],</span><br><span class="line">         [<span class="number">-0.1886</span>,  <span class="number">0.2883</span>, <span class="number">-0.0563</span>, <span class="number">-0.0352</span>, <span class="number">-0.2872</span>,  <span class="number">0.2700</span>,  <span class="number">0.0431</span>,</span><br><span class="line">           <span class="number">0.1887</span>,  <span class="number">0.0803</span>,  <span class="number">0.0254</span>,  <span class="number">0.1112</span>, <span class="number">-0.0077</span>,  <span class="number">0.3929</span>, <span class="number">-0.6681</span>,</span><br><span class="line">          <span class="number">-0.0804</span>, <span class="number">-0.0828</span>],</span><br><span class="line">         [<span class="number">-0.1767</span>,  <span class="number">0.3363</span>, <span class="number">-0.0719</span>, <span class="number">-0.0475</span>, <span class="number">-0.2858</span>,  <span class="number">0.2911</span>, <span class="number">-0.0109</span>,</span><br><span class="line">           <span class="number">0.2141</span>,  <span class="number">0.0779</span>,  <span class="number">0.0234</span>,  <span class="number">0.0866</span>, <span class="number">-0.0215</span>,  <span class="number">0.3831</span>, <span class="number">-0.7393</span>,</span><br><span class="line">          <span class="number">-0.0539</span>, <span class="number">-0.0580</span>],</span><br><span class="line">         [<span class="number">-0.1470</span>,  <span class="number">0.3710</span>, <span class="number">-0.0771</span>, <span class="number">-0.0605</span>, <span class="number">-0.2693</span>,  <span class="number">0.2962</span>, <span class="number">-0.0684</span>,</span><br><span class="line">           <span class="number">0.2291</span>,  <span class="number">0.0724</span>,  <span class="number">0.0204</span>,  <span class="number">0.0651</span>, <span class="number">-0.0356</span>,  <span class="number">0.3568</span>, <span class="number">-0.7885</span>,</span><br><span class="line">          <span class="number">-0.0341</span>, <span class="number">-0.0385</span>],</span><br><span class="line">         [<span class="number">-0.1142</span>,  <span class="number">0.3956</span>, <span class="number">-0.0744</span>, <span class="number">-0.0727</span>, <span class="number">-0.2434</span>,  <span class="number">0.2935</span>, <span class="number">-0.1226</span>,</span><br><span class="line">           <span class="number">0.2366</span>,  <span class="number">0.0636</span>,  <span class="number">0.0164</span>,  <span class="number">0.0477</span>, <span class="number">-0.0497</span>,  <span class="number">0.3136</span>, <span class="number">-0.8199</span>,</span><br><span class="line">          <span class="number">-0.0208</span>, <span class="number">-0.0245</span>],</span><br><span class="line">         [<span class="number">-0.0854</span>,  <span class="number">0.4126</span>, <span class="number">-0.0669</span>, <span class="number">-0.0829</span>, <span class="number">-0.2140</span>,  <span class="number">0.2871</span>, <span class="number">-0.1699</span>,</span><br><span class="line">           <span class="number">0.2389</span>,  <span class="number">0.0496</span>,  <span class="number">0.0118</span>,  <span class="number">0.0343</span>, <span class="number">-0.0641</span>,  <span class="number">0.2542</span>, <span class="number">-0.8307</span>,</span><br><span class="line">          <span class="number">-0.0124</span>, <span class="number">-0.0151</span>],</span><br><span class="line">         [<span class="number">-0.0847</span>,  <span class="number">0.4176</span>, <span class="number">-0.0620</span>, <span class="number">-0.0877</span>, <span class="number">-0.2053</span>,  <span class="number">0.2863</span>, <span class="number">-0.2063</span>,</span><br><span class="line">           <span class="number">0.2468</span>,  <span class="number">0.0281</span>,  <span class="number">0.0090</span>,  <span class="number">0.0254</span>, <span class="number">-0.0784</span>,  <span class="number">0.1827</span>, <span class="number">-0.7871</span>,</span><br><span class="line">          <span class="number">-0.0100</span>, <span class="number">-0.0116</span>],</span><br><span class="line">         [<span class="number">-0.0620</span>,  <span class="number">0.4284</span>, <span class="number">-0.0550</span>, <span class="number">-0.0931</span>, <span class="number">-0.1827</span>,  <span class="number">0.2785</span>, <span class="number">-0.2409</span>,</span><br><span class="line">           <span class="number">0.2438</span>, <span class="number">-0.0278</span>,  <span class="number">0.0044</span>,  <span class="number">0.0120</span>, <span class="number">-0.1073</span>,  <span class="number">0.0924</span>, <span class="number">-0.6543</span>,</span><br><span class="line">          <span class="number">-0.0047</span>, <span class="number">-0.0063</span>]],</span><br><span class="line"></span><br><span class="line">        [[<span class="number">-0.0087</span>,  <span class="number">0.0716</span>,  <span class="number">0.0069</span>, <span class="number">-0.0040</span>, <span class="number">-0.1375</span>,  <span class="number">0.0404</span>,  <span class="number">0.0757</span>,</span><br><span class="line">           <span class="number">0.0291</span>,  <span class="number">0.0486</span>,  <span class="number">0.0195</span>,  <span class="number">0.1454</span>,  <span class="number">0.0138</span>,  <span class="number">0.2596</span>, <span class="number">-0.2467</span>,</span><br><span class="line">          <span class="number">-0.1491</span>, <span class="number">-0.1596</span>],</span><br><span class="line">         [<span class="number">-0.0895</span>,  <span class="number">0.1504</span>, <span class="number">-0.0069</span>, <span class="number">-0.0137</span>, <span class="number">-0.2248</span>,  <span class="number">0.1365</span>,  <span class="number">0.1002</span>,</span><br><span class="line">           <span class="number">0.0918</span>,  <span class="number">0.0517</span>,  <span class="number">0.0197</span>,  <span class="number">0.1431</span>, <span class="number">-0.0005</span>,  <span class="number">0.2929</span>, <span class="number">-0.4016</span>,</span><br><span class="line">          <span class="number">-0.1401</span>, <span class="number">-0.1218</span>],</span><br><span class="line">         [<span class="number">-0.1621</span>,  <span class="number">0.2254</span>, <span class="number">-0.0318</span>, <span class="number">-0.0240</span>, <span class="number">-0.2693</span>,  <span class="number">0.2207</span>,  <span class="number">0.0843</span>,</span><br><span class="line">           <span class="number">0.1487</span>,  <span class="number">0.0439</span>,  <span class="number">0.0172</span>,  <span class="number">0.1198</span>, <span class="number">-0.0221</span>,  <span class="number">0.2856</span>, <span class="number">-0.5105</span>,</span><br><span class="line">          <span class="number">-0.1089</span>, <span class="number">-0.0852</span>],</span><br><span class="line">         [<span class="number">-0.1886</span>,  <span class="number">0.2883</span>, <span class="number">-0.0563</span>, <span class="number">-0.0352</span>, <span class="number">-0.2872</span>,  <span class="number">0.2700</span>,  <span class="number">0.0431</span>,</span><br><span class="line">           <span class="number">0.1887</span>,  <span class="number">0.0194</span>,  <span class="number">0.0129</span>,  <span class="number">0.0852</span>, <span class="number">-0.0521</span>,  <span class="number">0.2364</span>, <span class="number">-0.5524</span>,</span><br><span class="line">          <span class="number">-0.0720</span>, <span class="number">-0.0538</span>],</span><br><span class="line">         [<span class="number">-0.1767</span>,  <span class="number">0.3363</span>, <span class="number">-0.0719</span>, <span class="number">-0.0475</span>, <span class="number">-0.2858</span>,  <span class="number">0.2911</span>, <span class="number">-0.0109</span>,</span><br><span class="line">           <span class="number">0.2141</span>, <span class="number">-0.0274</span>,  <span class="number">0.0076</span>,  <span class="number">0.0448</span>, <span class="number">-0.0817</span>,  <span class="number">0.1408</span>, <span class="number">-0.4683</span>,</span><br><span class="line">          <span class="number">-0.0382</span>, <span class="number">-0.0285</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>]],</span><br><span class="line"></span><br><span class="line">        [[<span class="number">-0.1019</span>,  <span class="number">0.1606</span>, <span class="number">-0.0482</span>, <span class="number">-0.0519</span>, <span class="number">-0.1932</span>,  <span class="number">0.2632</span>, <span class="number">-0.0423</span>,</span><br><span class="line">           <span class="number">0.0774</span>,  <span class="number">0.0434</span>,  <span class="number">0.0142</span>,  <span class="number">0.0915</span>, <span class="number">-0.0455</span>,  <span class="number">0.2970</span>, <span class="number">-0.6665</span>,</span><br><span class="line">          <span class="number">-0.0578</span>, <span class="number">-0.0521</span>],</span><br><span class="line">         [<span class="number">-0.1855</span>,  <span class="number">0.2300</span>, <span class="number">-0.0625</span>, <span class="number">-0.0508</span>, <span class="number">-0.2488</span>,  <span class="number">0.2741</span>, <span class="number">-0.0638</span>,</span><br><span class="line">           <span class="number">0.1441</span>,  <span class="number">0.0239</span>,  <span class="number">0.0137</span>,  <span class="number">0.0786</span>, <span class="number">-0.0524</span>,  <span class="number">0.2311</span>, <span class="number">-0.5685</span>,</span><br><span class="line">          <span class="number">-0.0673</span>, <span class="number">-0.0485</span>],</span><br><span class="line">         [<span class="number">-0.1346</span>,  <span class="number">0.3093</span>, <span class="number">-0.0775</span>, <span class="number">-0.0678</span>, <span class="number">-0.2616</span>,  <span class="number">0.2946</span>, <span class="number">-0.1167</span>,</span><br><span class="line">           <span class="number">0.1699</span>, <span class="number">-0.0280</span>,  <span class="number">0.0067</span>,  <span class="number">0.0333</span>, <span class="number">-0.0924</span>,  <span class="number">0.1308</span>, <span class="number">-0.5332</span>,</span><br><span class="line">          <span class="number">-0.0237</span>, <span class="number">-0.0201</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>],</span><br><span class="line">         [ <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,  <span class="number">0.0000</span>,</span><br><span class="line">           <span class="number">0.0000</span>,  <span class="number">0.0000</span>]]], grad_fn=&lt;TransposeBackward0&gt;)</span><br><span class="line">padded_output shape</span><br><span class="line"> torch.Size([<span class="number">3</span>, <span class="number">10</span>, <span class="number">16</span>])</span><br><span class="line">length</span><br><span class="line"> tensor([<span class="number">10</span>,  <span class="number">5</span>,  <span class="number">3</span>])</span><br></pre></td></tr></table></figure>
+<p>是不是又回来了？16是cell_size*2, 因为是双向。</p>
+<p>可以看到，没参与计算后来被补上来的部分都成为了0！</p>
+<h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><h3 id="tensorflow"><a href="#tensorflow" class="headerlink" title="tensorflow"></a>tensorflow</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br></pre></td><td class="code"><pre><span class="line">mport os</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">from</span> util.embedding_util <span class="keyword">import</span> get_embedding</span><br><span class="line"><span class="keyword">from</span> util.plot_util <span class="keyword">import</span> loss_acc_plot</span><br><span class="line"><span class="keyword">from</span> util.lr_util <span class="keyword">import</span> lr_update</span><br><span class="line"><span class="keyword">import</span> config.lstm_config <span class="keyword">as</span> config</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BILSTM</span><span class="params">(tf.keras.Model)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, cell_size,</span></span></span><br><span class="line"><span class="function"><span class="params">                 checkpoint_dir,</span></span></span><br><span class="line"><span class="function"><span class="params">                 num_classes,</span></span></span><br><span class="line"><span class="function"><span class="params">                 model_type,</span></span></span><br><span class="line"><span class="function"><span class="params">                 vocab_size,</span></span></span><br><span class="line"><span class="function"><span class="params">                 word2id,</span></span></span><br><span class="line"><span class="function"><span class="params">                 embedding_dim,</span></span></span><br><span class="line"><span class="function"><span class="params">                 keep_prob)</span>:</span></span><br><span class="line">        super().__init__()</span><br><span class="line"></span><br><span class="line">        self.checkpoint_dir = checkpoint_dir</span><br><span class="line">        self.history = &#123;&#125;</span><br><span class="line">        self.keep_prob = keep_prob</span><br><span class="line"></span><br><span class="line">        <span class="comment"># embedding layer</span></span><br><span class="line">        weights = get_embedding(model_type=model_type,</span><br><span class="line">                                word2id=word2id,</span><br><span class="line">                                embedding_dim=embedding_dim)</span><br><span class="line">        <span class="keyword">if</span> model_type == <span class="string">'static'</span>:</span><br><span class="line">            self.embeddings = tf.keras.layers.Embedding(vocab_size, embedding_dim, weights=weights, trainable=<span class="keyword">False</span>)</span><br><span class="line">        <span class="keyword">elif</span> model_type == <span class="string">'non-static'</span>:</span><br><span class="line">            self.embeddings = tf.keras.layers.Embedding(vocab_size, embedding_dim, weights=weights, trainable=<span class="keyword">True</span>)</span><br><span class="line">        <span class="keyword">elif</span> model_type == <span class="string">'rand'</span>:</span><br><span class="line">            self.embeddings = tf.keras.layers.Embedding(vocab_size, embedding_dim, weights=weights, trainable=<span class="keyword">True</span>)</span><br><span class="line">        <span class="keyword">elif</span> model_type == <span class="string">'multichannel'</span>:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">'unknown model type'</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># BILSTM layer</span></span><br><span class="line">        self.fw_cell = tf.nn.rnn_cell.DropoutWrapper(</span><br><span class="line">            tf.nn.rnn_cell.LSTMCell(num_units=cell_size), output_keep_prob=<span class="number">0.7</span>)</span><br><span class="line">        self.bw_cell = tf.nn.rnn_cell.DropoutWrapper(</span><br><span class="line">            tf.nn.rnn_cell.LSTMCell(num_units=cell_size), output_keep_prob=<span class="number">0.7</span>)</span><br><span class="line"></span><br><span class="line">        self.Dense = tf.layers.Dense(units=num_classes, activation=<span class="keyword">None</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs, seq_length, training)</span>:</span></span><br><span class="line">        embedded_words = self.embeddings(inputs)</span><br><span class="line">        outputs, final_state = tf.nn.bidirectional_dynamic_rnn(</span><br><span class="line">            self.fw_cell,</span><br><span class="line">            self.bw_cell,</span><br><span class="line">            inputs=embedded_words,</span><br><span class="line">            sequence_length=seq_length,</span><br><span class="line">            dtype=tf.float32,</span><br><span class="line">            time_major=<span class="keyword">False</span>)</span><br><span class="line">        outputs = tf.concat(outputs, axis=<span class="number">2</span>)</span><br><span class="line">        final_output = outputs[<span class="number">-1</span>]</span><br><span class="line">        logits = self.Dense(final_output)</span><br><span class="line">        <span class="keyword">return</span> logits</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">loss_fn</span><span class="params">(self, inputs, target, seq_length, training)</span>:</span></span><br><span class="line">        preds = self.call(inputs, seq_length, training)</span><br><span class="line">        <span class="comment"># L2正则化</span></span><br><span class="line">        loss_L2 = tf.add_n([tf.nn.l2_loss(v)</span><br><span class="line">                            <span class="keyword">for</span> v <span class="keyword">in</span> self.trainable_variables</span><br><span class="line">                            <span class="keyword">if</span> <span class="string">'bias'</span> <span class="keyword">not</span> <span class="keyword">in</span> v.name]) * <span class="number">0.001</span></span><br><span class="line">        loss = tf.losses.sparse_softmax_cross_entropy(labels=target, logits=preds)</span><br><span class="line">        loss = loss + loss_L2</span><br><span class="line">        <span class="keyword">return</span> loss</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">grads_fn</span><span class="params">(self, inputs, target, seq_length, training)</span>:</span></span><br><span class="line">        <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">            loss = self.loss_fn(inputs, target, seq_length, training)</span><br><span class="line">        <span class="keyword">return</span> tape.gradient(loss, self.variables)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">save_model</span><span class="params">(self, model)</span>:</span></span><br><span class="line">        <span class="string">""" Function to save trained model.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        checkpoint = tf.train.Checkpoint(model=model)</span><br><span class="line">        checkpoint_prefix = os.path.join(self.checkpoint_dir, <span class="string">'ckpt'</span>)</span><br><span class="line">        checkpoint.save(file_prefix=checkpoint_prefix)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">restore_model</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># Run the model once to initialize variables</span></span><br><span class="line">        dummy_input = tf.constant(tf.zeros((<span class="number">1</span>, <span class="number">1</span>)))</span><br><span class="line">        dummy_length = tf.constant(<span class="number">1</span>, shape=(<span class="number">1</span>,))</span><br><span class="line">        self(dummy_input, dummy_length, <span class="keyword">False</span>)</span><br><span class="line">        <span class="comment"># Restore the variables of the model</span></span><br><span class="line">        saver = tf.contrib.Saver(self.variables)</span><br><span class="line">        saver.restore(tf.train.latest_checkpoint</span><br><span class="line">                      (self.checkpoint_directory))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_accuracy</span><span class="params">(self, inputs, target, seq_length, training)</span>:</span></span><br><span class="line">        y = self.call(inputs, seq_length, training)</span><br><span class="line">        y_pred = tf.argmax(y, axis=<span class="number">1</span>)</span><br><span class="line">        correct = tf.where(tf.equal(y_pred, target)).numpy().shape[<span class="number">0</span>]</span><br><span class="line">        total = target.numpy().shape[<span class="number">0</span>]</span><br><span class="line">        <span class="keyword">return</span> correct/total</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">fit</span><span class="params">(self, training_data, eval_data, pbar, num_epochs=<span class="number">100</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">            early_stopping_rounds=<span class="number">5</span>, verbose=<span class="number">1</span>, train_from_scratch=True)</span>:</span></span><br><span class="line">        <span class="string">"""train the model"""</span></span><br><span class="line">        <span class="keyword">if</span> train_from_scratch <span class="keyword">is</span> <span class="keyword">False</span>:</span><br><span class="line">            self.restore_model()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Initialize best loss. This variable will store the lowest loss on the</span></span><br><span class="line">        <span class="comment"># eval dataset.</span></span><br><span class="line">        best_loss = <span class="number">2018</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># Initialize classes to update the mean loss of train and eval</span></span><br><span class="line">        train_loss = []</span><br><span class="line">        eval_loss = []</span><br><span class="line">        train_accuracy = []</span><br><span class="line">        eval_accuracy = []</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Initialize dictionary to store the loss history</span></span><br><span class="line">        self.history[<span class="string">'train_loss'</span>] = []</span><br><span class="line">        self.history[<span class="string">'eval_loss'</span>] = []</span><br><span class="line">        self.history[<span class="string">'train_accuracy'</span>] = []</span><br><span class="line">        self.history[<span class="string">'eval_accuracy'</span>] = []</span><br><span class="line"></span><br><span class="line">        count = early_stopping_rounds</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Begin training</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(num_epochs):</span><br><span class="line">            <span class="comment"># 在每个epoch训练之初初始化optimizer，决定是否使用学习率衰减</span></span><br><span class="line">            learning_rate = lr_update(i+<span class="number">1</span>, mode=config.lr_mode)</span><br><span class="line">            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Training with gradient descent</span></span><br><span class="line">            start = time.time()</span><br><span class="line">            <span class="keyword">for</span> index, (sequence, label, seq_length) <span class="keyword">in</span> enumerate(training_data):</span><br><span class="line">                <span class="comment"># cpu需要类型转换，不然会报错：Could not find valid device</span></span><br><span class="line">                sequence = tf.cast(sequence, dtype=tf.float32)</span><br><span class="line">                label = tf.cast(label, dtype=tf.int64)</span><br><span class="line">                grads = self.grads_fn(sequence, label, seq_length, training=<span class="keyword">True</span>)</span><br><span class="line">                optimizer.apply_gradients(zip(grads, self.variables))</span><br><span class="line">                pbar.show(index, use_time=time.time()-start)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Compute the loss on the training data after one epoch</span></span><br><span class="line">            <span class="keyword">for</span> sequence, label, seq_length <span class="keyword">in</span> training_data:</span><br><span class="line">                sequence = tf.cast(sequence, dtype=tf.float32)</span><br><span class="line">                label = tf.cast(label, dtype=tf.int64)</span><br><span class="line">                train_los = self.loss_fn(sequence, label, seq_length, training=<span class="keyword">False</span>)</span><br><span class="line">                train_acc = self.get_accuracy(sequence, label, seq_length, training=<span class="keyword">False</span>)</span><br><span class="line">                train_loss.append(train_los)</span><br><span class="line">                train_accuracy.append(train_acc)</span><br><span class="line">            self.history[<span class="string">'train_loss'</span>].append(np.mean(train_loss))</span><br><span class="line">            self.history[<span class="string">'train_accuracy'</span>].append(np.mean(train_accuracy))</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Compute the loss on the eval data after one epoch</span></span><br><span class="line">            <span class="keyword">for</span> sequence, label, seq_length <span class="keyword">in</span> eval_data:</span><br><span class="line">                sequence = tf.cast(sequence, dtype=tf.float32)</span><br><span class="line">                label = tf.cast(label, dtype=tf.int64)</span><br><span class="line">                eval_los = self.loss_fn(sequence, label, seq_length, training=<span class="keyword">False</span>)</span><br><span class="line">                eval_acc = self.get_accuracy(sequence, label, seq_length, training=<span class="keyword">False</span>)</span><br><span class="line">                eval_loss.append(eval_los)</span><br><span class="line">                eval_accuracy.append(eval_acc)</span><br><span class="line">            self.history[<span class="string">'eval_loss'</span>].append(np.mean(eval_loss))</span><br><span class="line">            self.history[<span class="string">'eval_accuracy'</span>].append(np.mean(eval_accuracy))</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Print train and eval losses</span></span><br><span class="line">            <span class="keyword">if</span> (i == <span class="number">0</span>) | ((i + <span class="number">1</span>) % verbose == <span class="number">0</span>):</span><br><span class="line">                print(<span class="string">'Epoch %d - train_loss: %4f - eval_loss: %4f - train_acc:%4f - eval_acc:%4f'</span></span><br><span class="line">                      % (i + <span class="number">1</span>,</span><br><span class="line">                         self.history[<span class="string">'train_loss'</span>][<span class="number">-1</span>],</span><br><span class="line">                         self.history[<span class="string">'eval_loss'</span>][<span class="number">-1</span>],</span><br><span class="line">                         self.history[<span class="string">'train_accuracy'</span>][<span class="number">-1</span>],</span><br><span class="line">                         self.history[<span class="string">'eval_accuracy'</span>][<span class="number">-1</span>]))</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Check for early stopping</span></span><br><span class="line">            <span class="keyword">if</span> self.history[<span class="string">'eval_loss'</span>][<span class="number">-1</span>] &lt; best_loss:</span><br><span class="line">                best_loss = self.history[<span class="string">'eval_loss'</span>][<span class="number">-1</span>]</span><br><span class="line">                count = early_stopping_rounds</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                count -= <span class="number">1</span></span><br><span class="line">            <span class="keyword">if</span> count == <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">        <span class="comment"># 画出loss_acc曲线</span></span><br><span class="line">        loss_acc_plot(history=self.history)</span><br></pre></td></tr></table></figure>
+<h3 id="pytorch"><a href="#pytorch" class="headerlink" title="pytorch"></a>pytorch</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pad_packed_sequence, pack_padded_sequence</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> f1_score</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> config.config <span class="keyword">as</span> config</span><br><span class="line"><span class="keyword">from</span> util.embedding_util <span class="keyword">import</span> get_embedding</span><br><span class="line"></span><br><span class="line">torch.manual_seed(<span class="number">2018</span>)</span><br><span class="line">torch.cuda.manual_seed(<span class="number">2018</span>)</span><br><span class="line">torch.cuda.manual_seed_all(<span class="number">2018</span>)</span><br><span class="line">np.random.seed(<span class="number">2018</span>)</span><br><span class="line"></span><br><span class="line">os.environ[<span class="string">"CUDA_VISIBLE_DEVICE"</span>] = <span class="string">"1"</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RNN</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, vocab_size,</span></span></span><br><span class="line"><span class="function"><span class="params">                 word_embedding_dimension,</span></span></span><br><span class="line"><span class="function"><span class="params">                 hidden_size, bi_flag,</span></span></span><br><span class="line"><span class="function"><span class="params">                 num_layer,</span></span></span><br><span class="line"><span class="function"><span class="params">                 labels,</span></span></span><br><span class="line"><span class="function"><span class="params">                 cell_type,</span></span></span><br><span class="line"><span class="function"><span class="params">                 dropout,</span></span></span><br><span class="line"><span class="function"><span class="params">                 checkpoint_dir)</span>:</span></span><br><span class="line">        super(RNN, self).__init__()</span><br><span class="line">        self.labels = labels</span><br><span class="line">        self.num_label = len(labels)</span><br><span class="line">        self.num_layer = num_layer</span><br><span class="line">        self.hidden_size = hidden_size</span><br><span class="line">        self.dropout = dropout</span><br><span class="line">        self.checkpoint_dir = checkpoint_dir</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> torch.cuda.is_available():</span><br><span class="line">            self.device = torch.device(<span class="string">"cuda"</span>)</span><br><span class="line"></span><br><span class="line">        self.embedding = nn.Embedding(vocab_size, word_embedding_dimension)</span><br><span class="line">        <span class="keyword">for</span> p <span class="keyword">in</span> self.embedding.parameters():</span><br><span class="line">            p.requires_grad = <span class="keyword">False</span></span><br><span class="line">        self.embedding.weight.data.copy_(torch.from_numpy(get_embedding(vocab_size, word_embedding_dimension)))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> cell_type == <span class="string">"LSTM"</span>:</span><br><span class="line">            self.rnn_cell = nn.LSTM(input_size=word_embedding_dimension,</span><br><span class="line">                                    hidden_size=hidden_size,</span><br><span class="line">                                    num_layers=num_layer,</span><br><span class="line">                                    batch_first=<span class="keyword">True</span>,</span><br><span class="line">                                    dropout=dropout,</span><br><span class="line">                                    bidirectional=bi_flag)</span><br><span class="line">        <span class="keyword">elif</span> cell_type == <span class="string">"GRU"</span>:</span><br><span class="line">            self.rnn_cell = nn.GRU(input_size=word_embedding_dimension,</span><br><span class="line">                                   hidden_size=hidden_size,</span><br><span class="line">                                   num_layers=num_layer,</span><br><span class="line">                                   batch_first=<span class="keyword">True</span>,</span><br><span class="line">                                   dropout=dropout,</span><br><span class="line">                                   bidirectional=bi_flag)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">raise</span> TypeError(<span class="string">"RNN: Unknown rnn cell type"</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 是否双向</span></span><br><span class="line">        self.bi_num = <span class="number">2</span> <span class="keyword">if</span> bi_flag <span class="keyword">else</span> <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        self.linear = nn.Linear(hidden_size*self.bi_num, self.num_label)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, inputs, length)</span>:</span></span><br><span class="line">        batch_size = inputs.shape[<span class="number">0</span>]</span><br><span class="line">        <span class="comment"># 初始化态h和C,默认为zeros</span></span><br><span class="line">        h_0 = torch.zeros(self.num_layer*self.bi_num, batch_size, self.hidden_size).float()</span><br><span class="line">        c_0 = torch.zeros(self.num_layer*self.bi_num, batch_size, self.hidden_size).float()</span><br><span class="line"></span><br><span class="line">        embeddings = self.embedding(inputs, length)  <span class="comment"># (batch_size, time_steps, embedding_dim)</span></span><br><span class="line">        <span class="comment"># 去除padding元素</span></span><br><span class="line">        <span class="comment"># embeddings_packed: (batch_size*time_steps, embedding_dim)</span></span><br><span class="line">        embeddings_packed = pack_padded_sequence(embeddings, length, batch_first=<span class="keyword">True</span>)</span><br><span class="line">        output, (h_n, c_n) = self.rnn_cell(embeddings_packed, (h_0, c_0))</span><br><span class="line">        <span class="comment"># padded_output: (batch_size, time_steps, hidden_size * bi_num)</span></span><br><span class="line">        <span class="comment"># h_n|c_n: (num_layer*bi_num, batch_size, hidden_size)</span></span><br><span class="line">        padded_output, _ = pad_packed_sequence(output, batch_first=<span class="keyword">True</span>)</span><br><span class="line">        <span class="comment"># 取最后一个有效输出作为最终输出（0为无效输出）</span></span><br><span class="line">        last_output = padded_output[torch.LongTensor(range(batch_size)), length]</span><br><span class="line">        last_output = F.dropout(last_output, p=self.dropout, training=self.training)</span><br><span class="line">        output = self.linear(last_output)</span><br><span class="line">        <span class="keyword">return</span> output</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">load</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.load_state_dict(torch.load(self.checkpoint_dir))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">save</span><span class="params">(self)</span>:</span></span><br><span class="line">        torch.save(self.state_dict(), self.checkpoint_dir)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">evaluate</span><span class="params">(self, y_pred, y_true)</span>:</span></span><br><span class="line">        _, y_pred = torch.max(y_pred.data, <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> config.use_cuda:</span><br><span class="line">            y_true = y_true.cpu().numpy()</span><br><span class="line">            y_pred = y_pred.cpu().numpy()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            y_true = y_true.numpy()</span><br><span class="line">            y_pred = y_pred.numpy()</span><br><span class="line">        f1 = f1_score(y_true, y_pred, labels=self.labels, average=<span class="string">"macro"</span>)</span><br><span class="line">        correct = np.sum((y_true==y_pred).astype(int))</span><br><span class="line">        acc = correct/y_pred.shape[<span class="number">0</span>]</span><br><span class="line">        <span class="keyword">return</span> (acc, f1)</span><br></pre></td></tr></table></figure>
+<p>各位晚安~</p>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpeg" alt="circlepi">
+            
+              <p class="site-author-name" itemprop="name">circlepi</p>
+              <p class="site-description motion-element" itemprop="description">饮钱江水，恋皖南家</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/circlePi" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto circlepi.top@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://weibo.com/fly51fly" title="爱可可爱生活" target="_blank">爱可可爱生活</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.jiqizhixin.com/" title="机器之心" target="_blank">机器之心</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://lonepatient.top/" title="lonepatient" target="_blank">lonepatient</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.kaggle.com/" title="Kaggle" target="_blank">Kaggle</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Background"><span class="nav-number">2.</span> <span class="nav-text">Background</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tensorflow的BILSTM"><span class="nav-number">2.1.</span> <span class="nav-text">tensorflow的BILSTM</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pytorch-BILSTM"><span class="nav-number">3.</span> <span class="nav-text">Pytorch BILSTM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LSTM定义"><span class="nav-number">3.1.</span> <span class="nav-text">LSTM定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pack-padded-sequence"><span class="nav-number">3.2.</span> <span class="nav-text">pack_padded_sequence</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pad-packed-sequence"><span class="nav-number">3.3.</span> <span class="nav-text">pad_packed_sequence</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#完整代码"><span class="nav-number">4.</span> <span class="nav-text">完整代码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tensorflow"><span class="nav-number">4.1.</span> <span class="nav-text">tensorflow</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pytorch"><span class="nav-number">4.2.</span> <span class="nav-text">pytorch</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+ <span class="with-love" id="heart">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">circlepi</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<div> 
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> 本站总访问量 <span id="busuanzi_value_site_pv"></span> 次
+</div>  
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共11.4k字</span>
+</div>
+
+<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1275169677'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s13.cnzz.com/z_stat.php%3Fid%3D1275169677%26show%3Dpic2' type='text/javascript'%3E%3C/script%3E"));</script>
+</div>
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </footer></div>
+    
+
+    
+
+    
+
+  
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'bV2cKuAP9eAIiQLrXrqrEHui-gzGzoHsz',
+        appKey: 'Tb0BblyR6jqQCdJ0acSzfJr2',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+
+<!-- 代码块复制功能 -->
+<script type="text/javascript" src="/js/src/clipboard.min.js"></script>  
+<script type="text/javascript" src="/js/src/clipboard-use.js"></script>
+</body>
+</html>

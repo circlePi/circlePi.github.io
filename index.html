@@ -343,7 +343,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://state-of-art.top/2018/11/28/torchtext读取文本数据集/">
+    <link itemprop="mainEntityOfPage" href="http://state-of-art.top/2018/11/30/浅析pytorch中的LSTM(GRU) /">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="circlepi">
@@ -362,7 +362,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/11/28/torchtext读取文本数据集/" itemprop="url">torchtext读取文本数据集</a></h1>
+                <a class="post-title-link" href="/2018/11/30/浅析pytorch中的LSTM(GRU) /" itemprop="url">浅析pytorch中的LSTM(GRU)</a></h1>
         
 
         <div class="post-meta">
@@ -374,8 +374,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-28T23:21:08+08:00">
-                2018-11-28
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-30T23:21:08+08:00">
+                2018-11-30
               </time>
             
 
@@ -397,8 +397,8 @@
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/NLP/" itemprop="url" rel="index">
-                    <span itemprop="name">NLP</span>
+                  <a href="/categories/pytorch/" itemprop="url" rel="index">
+                    <span itemprop="name">pytorch</span>
                   </a>
                 </span>
 
@@ -415,8 +415,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/11/28/torchtext读取文本数据集/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/28/torchtext读取文本数据集/" itemprop="commentCount"></span>
+                <a href="/2018/11/30/浅析pytorch中的LSTM(GRU) /#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/30/浅析pytorch中的LSTM(GRU) /" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -438,7 +438,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  1.9k
+                  4.2k
                 </span>
               
 
@@ -465,18 +465,15 @@
       
         
           
-          Introduction本文主要介绍如何使用Torchtext读取文本数据集。
-Torchtext是非官方的、一种为pytorch提供文本数据处理能力的库， 类似于图像处理库Torchvision。
-Install
-下载地址：https://github.com/text
-安装：pip install text-master.zip
-测试安装是否成功： import torchtext
+          Introduction本文介绍pytorch RNN网络搭建，主要包括LSTM和GRU的使用。
+最近从tensorflow入坑pytorch，发现两者的RNN模块前向传播有些不同。特别是RNN中的pack_padded_sequence和pad_packed_sequence。
+Backgroundtensorflow的BILSTM以BILSTM为例，tensorflow中我们一般这样操作：
 
-How 
+
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/11/28/torchtext读取文本数据集/#more" rel="contents">
+            <a class="btn" href="/2018/11/30/浅析pytorch中的LSTM(GRU) /#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -660,6 +657,190 @@ How To Do IT原始数据集123411@成都 高新技术 产业 开发区 人民 �
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2018/11/28/文本预处理/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://state-of-art.top/2018/11/28/torchtext读取文本数据集/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="circlepi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/touxiang.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="circlepi's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/11/28/torchtext读取文本数据集/" itemprop="url">torchtext读取文本数据集</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-28T23:21:08+08:00">
+                2018-11-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/NLP/" itemprop="url" rel="index">
+                    <span itemprop="name">NLP</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/28/torchtext读取文本数据集/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/28/torchtext读取文本数据集/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.9k
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          Introduction本文主要介绍如何使用Torchtext读取文本数据集。
+Torchtext是非官方的、一种为pytorch提供文本数据处理能力的库， 类似于图像处理库Torchvision。
+Install
+下载地址：https://github.com/text
+安装：pip install text-master.zip
+测试安装是否成功： import torchtext
+
+How 
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/11/28/torchtext读取文本数据集/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1110,7 +1291,7 @@ QueueRu
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1121,7 +1302,7 @@ QueueRu
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -1132,7 +1313,7 @@ QueueRu
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -1250,7 +1431,7 @@ QueueRu
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count">博客全站共7.2k字</span>
+  <span class="post-count">博客全站共11.4k字</span>
 </div>
 
 <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1275169677'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s13.cnzz.com/z_stat.php%3Fid%3D1275169677%26show%3Dpic2' type='text/javascript'%3E%3C/script%3E"));</script>
