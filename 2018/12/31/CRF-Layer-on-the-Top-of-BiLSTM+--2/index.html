@@ -113,7 +113,7 @@
 
 
 
-  <meta name="keywords" content="Tensorflow,">
+  <meta name="keywords" content="NER,深度学习,CRF,">
 
 
 
@@ -126,18 +126,21 @@
 
 
 
-<meta name="description" content="本文介绍图片数据使用TFrecord和tf.data.dataset进行存储和读取。 Tensorflow 提供了四种数据读取方式：  Preloaded data: 用一个tf.constant常量将数据集加载进来，主要用于很小的数据集；  Feeding: 使用python代码供给数据，将所有数据加载进内存，然后一个batch一个batch地输入到计算图中， 适用于小数据集；  QueueRu">
-<meta name="keywords" content="Tensorflow">
+<meta name="description" content="在上一节中，我们知道CRF层可以从训练数据集中自动学习到一些约束规则来保证预测标签的合法性。这些约束包括：  句子中第一个词总是以标签“B-“ 或 “O”开始，而不是“I-” 标签“B-label1I-label2 I-label3 I-…”,label1, label2, label3应该属于同一类实体。例如，“B-PersonI-Person” 是合理的序列, 但是“B-Person I-Or">
+<meta name="keywords" content="NER,深度学习,CRF">
 <meta property="og:type" content="article">
-<meta property="og:title" content="图像数据-TFrecord在动态图中的使用">
-<meta property="og:url" content="http://state-of-art.top/2018/10/27/TFrecord在动态图中的使用/index.html">
+<meta property="og:title" content="BiLSTM模型中CRF层的运行原理(二)">
+<meta property="og:url" content="http://state-of-art.top/2018/12/31/CRF-Layer-on-the-Top-of-BiLSTM+--2/index.html">
 <meta property="og:site_name" content="circlepi&#39;s blog">
-<meta property="og:description" content="本文介绍图片数据使用TFrecord和tf.data.dataset进行存储和读取。 Tensorflow 提供了四种数据读取方式：  Preloaded data: 用一个tf.constant常量将数据集加载进来，主要用于很小的数据集；  Feeding: 使用python代码供给数据，将所有数据加载进内存，然后一个batch一个batch地输入到计算图中， 适用于小数据集；  QueueRu">
+<meta property="og:description" content="在上一节中，我们知道CRF层可以从训练数据集中自动学习到一些约束规则来保证预测标签的合法性。这些约束包括：  句子中第一个词总是以标签“B-“ 或 “O”开始，而不是“I-” 标签“B-label1I-label2 I-label3 I-…”,label1, label2, label3应该属于同一类实体。例如，“B-PersonI-Person” 是合理的序列, 但是“B-Person I-Or">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-10-28T08:50:46.251Z">
+<meta property="og:image" content=" https://lonepatient-1257945978.cos.ap-chengdu.myqcloud.com/20181228000013.png">
+<meta property="og:image" content=" https://lonepatient-1257945978.cos.ap-chengdu.myqcloud.com/20181228000035.png">
+<meta property="og:updated_time" content="2018-12-31T07:22:33.525Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="图像数据-TFrecord在动态图中的使用">
-<meta name="twitter:description" content="本文介绍图片数据使用TFrecord和tf.data.dataset进行存储和读取。 Tensorflow 提供了四种数据读取方式：  Preloaded data: 用一个tf.constant常量将数据集加载进来，主要用于很小的数据集；  Feeding: 使用python代码供给数据，将所有数据加载进内存，然后一个batch一个batch地输入到计算图中， 适用于小数据集；  QueueRu">
+<meta name="twitter:title" content="BiLSTM模型中CRF层的运行原理(二)">
+<meta name="twitter:description" content="在上一节中，我们知道CRF层可以从训练数据集中自动学习到一些约束规则来保证预测标签的合法性。这些约束包括：  句子中第一个词总是以标签“B-“ 或 “O”开始，而不是“I-” 标签“B-label1I-label2 I-label3 I-…”,label1, label2, label3应该属于同一类实体。例如，“B-PersonI-Person” 是合理的序列, 但是“B-Person I-Or">
+<meta name="twitter:image" content=" https://lonepatient-1257945978.cos.ap-chengdu.myqcloud.com/20181228000013.png">
 
 
 
@@ -167,13 +170,13 @@
 
 
 
-  <link rel="canonical" href="http://state-of-art.top/2018/10/27/TFrecord在动态图中的使用/">
+  <link rel="canonical" href="http://state-of-art.top/2018/12/31/CRF-Layer-on-the-Top-of-BiLSTM+--2/">
 
 
 
 
 
-  <title>图像数据-TFrecord在动态图中的使用 | circlepi's blog</title>
+  <title>BiLSTM模型中CRF层的运行原理(二) | circlepi's blog</title>
   
 
 
@@ -343,7 +346,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://state-of-art.top/2018/10/27/TFrecord在动态图中的使用/">
+    <link itemprop="mainEntityOfPage" href="http://state-of-art.top/2018/12/31/CRF-Layer-on-the-Top-of-BiLSTM+--2/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="circlepi">
@@ -360,7 +363,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">图像数据-TFrecord在动态图中的使用</h1>
+          <h1 class="post-title" itemprop="name headline">BiLSTM模型中CRF层的运行原理(二)</h1>
         
 
         <div class="post-meta">
@@ -372,8 +375,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-27T23:21:08+08:00">
-                2018-10-27
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-31T23:27:08+08:00">
+                2018-12-31
               </time>
             
 
@@ -395,8 +398,19 @@
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/Tensorflow/" itemprop="url" rel="index">
-                    <span itemprop="name">Tensorflow</span>
+                  <a href="/categories/深度学习/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/深度学习/自然语言处理/" itemprop="url" rel="index">
+                    <span itemprop="name">自然语言处理</span>
                   </a>
                 </span>
 
@@ -413,8 +427,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/10/27/TFrecord在动态图中的使用/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/27/TFrecord在动态图中的使用/" itemprop="commentCount"></span>
+                <a href="/2018/12/31/CRF-Layer-on-the-Top-of-BiLSTM+--2/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/31/CRF-Layer-on-the-Top-of-BiLSTM+--2/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -436,7 +450,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  1.1k
+                  3.7k
                 </span>
               
 
@@ -461,37 +475,292 @@
       
 
       
-        <p>本文介绍图片数据使用TFrecord和tf.data.dataset进行存储和读取。</p>
-<p>Tensorflow 提供了四种数据读取方式：</p>
-<ol>
-<li><p>Preloaded data: 用一个tf.constant常量将数据集加载进来，主要用于很小的数据集；</p>
+        <p>在上一节中，我们知道CRF层可以从训练数据集中自动学习到一些约束规则来保证预测标签的合法性。这些约束包括：</p>
+<ul>
+<li>句子中第一个词总是以标签“B-“ 或 “O”开始，而不是“I-”</li>
+<li>标签“B-label1I-label2 I-label3 I-…”,label1, label2, label3应该属于同一类实体。例如，“B-PersonI-Person” 是合理的序列, 但是“B-Person I-Organization” 是不合理标签序列.</li>
+<li>标签序列“O I-label”是不合理的，实体标签的首个标签应该是 “B-“ ，而非 “I-“, 换句话说，有效的标签序列应该是“O B-label”。</li>
+</ul>
+<p>这一节，我们将解释为什么CRF层会自动学习到这些约束规则。</p>
+<a id="more"></a>
+<h2 id="1-CRF层"><a href="#1-CRF层" class="headerlink" title="1.CRF层"></a>1.CRF层</h2><p>在CRF层损失函数中，有两种形式的score。这些scores是CRF层的关键概念。</p>
+<h3 id="1-1-emission-score"><a href="#1-1-emission-score" class="headerlink" title="1.1 emission score"></a>1.1 emission score</h3><p>第一个是emission score，主要来自BiLSTM层的输出，如下图所示，比如，单元$w_0$标记为‘B-Person’的score为1.5：</p>
+<div align="center"><img src=" https://lonepatient-1257945978.cos.ap-chengdu.myqcloud.com/20181228000013.png"></div>
+
+<p>为了方便起见，我们用数字来表示各个实体标签，对应关系如下：</p>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Index</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B-Person</td>
+<td>0</td>
+</tr>
+<tr>
+<td>I-Person</td>
+<td>1</td>
+</tr>
+<tr>
+<td>B-Organization</td>
+<td>2</td>
+</tr>
+<tr>
+<td>I-Organization</td>
+<td>3</td>
+</tr>
+<tr>
+<td>O</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<p>另外，我们使用$x_{iy_j}$表示emission score，其中:</p>
+<ul>
+<li>i 表示词的索引</li>
+<li>$y_j$表示标签的索引</li>
+</ul>
+<p>例如，根据上图，我们可以得到$x_{i=1,y_j=2} = x_{w_1,B-Organization} = 0.1$，也就是说$w_1$标记为’B-Organization‘的score为0.1。</p>
+<h3 id="1-2-Transition-score"><a href="#1-2-Transition-score" class="headerlink" title="1.2 Transition score"></a>1.2 Transition score</h3><p>我们定义$t_{y_iy_j}$表示transition score，从上图中可知$t_{B-Person,I-Person} = 0.9$，也就是说“$B-Person \rightarrow I-Person$“的标签转移得分为0.9。因此，对于所有的标签序列组合，我们将得到一个transition score矩阵，包含了所有标签之间的transition score。</p>
+<p>为了使transition score矩阵更具鲁棒性，我们额外增加两个标签——START 和END，START 代表句子的开始位置，而非第一个词，同理，END代表句子的结束位置.</p>
+<p>表1 中包含了START和END标签的transition score矩阵。</p>
+<div align="center"><img src=" https://lonepatient-1257945978.cos.ap-chengdu.myqcloud.com/20181228000035.png"></div>
+
+<p>如表1所示，我们可以发现transition score矩阵可以学习到好多约束规则，比如:</p>
+<ul>
+<li>句子中第一个词总是以标签“B-“ 或 “O”开始，而不是“I-”（例如，从“START” 到 “I-Person or I-Organization”的score都很低 ）。</li>
+<li>标签“B-label1I-label2 I-label3 I-…”,label1, label2, label3应该属于同一类实体。例如，“B-Person I-Person” 是合理的序列, 但是“B-Person I-Organization” 是不合理的标签序列（例如，从“B-Organization”到’I-Person’的score只有0.0003，比其他都低。）。</li>
+<li>标签序列“O I-label” 是不合理的.实体标签的首个标签应该是 “B-“ ，而非 “I-“, 换句话说,有效的标签序列应该是“O B-label”（例如，$t_{O,I-Person}$的score就非常小）。</li>
+</ul>
+<p>你可能会有一个疑问，该transition score矩阵如何计算得到？</p>
+<p>事实上，该矩阵是BiLSTM-CRF模型的一个参数，在训练模型之前，一般会初始化一个矩阵作为transition score矩阵，在训练过程中，该矩阵中的transition score都会不断地自动更新。也就是说CRF层可以自动学习，通过学习得到一个最优的transition score矩阵，而不用我们手工定义一个transition score矩阵。当模型训练不断地持续，该矩阵会越来越合理。</p>
+<h3 id="1-3-CRF损失函数"><a href="#1-3-CRF损失函数" class="headerlink" title="1.3 CRF损失函数"></a>1.3 CRF损失函数</h3><p>CRF损失函数中包含了真实标签序列得分和所有可能标签序列的总得分，正常情况下，真实标签序列得分在所有可能标签序列得分中是最高的。</p>
+<p>比如，假设数据集中的标签如下所示：</p>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Index</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B-Person</td>
+<td>0</td>
+</tr>
+<tr>
+<td>I-Person</td>
+<td>1</td>
+</tr>
+<tr>
+<td>B-Organization</td>
+<td>2</td>
+</tr>
+<tr>
+<td>I-Organization</td>
+<td>3</td>
+</tr>
+<tr>
+<td>O</td>
+<td>4</td>
+</tr>
+<tr>
+<td>START</td>
+<td>5</td>
+</tr>
+<tr>
+<td>END</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<p>那么，在第一节中我们假设的句子$x$，所有可能的标签序列组合为:</p>
+<ul>
+<li>(1) START B-Person B-Person B-Person B-Person B-Person END</li>
+<li>(2) START B-Person I-Person B-Person B-Person B-Person END</li>
+<li>…</li>
+<li>(10) <strong>START B-Person I-Person O B-Organization O END </strong></li>
+<li>…</li>
+<li>(N) O O O O O O O</li>
+</ul>
+<p>假设一共有N中可能的标签序列组合，且第$i$个标签序列的得分为$P_i$，那么所有可能标签序列组合的总得分为：</p>
+<p>$$ P_{total} = P_1 + P_2 + … + P_N = e^{S_1} + e^{S_2} + … + e^{S_N} $$ </p>
+<p>按照我们之前的假设，第10个是真实的标签序列，那么，我们想要的结果是第10个标签序列得分在所有可能的标签序列得分中是最高的。</p>
+<p>因此，我们可以定义模型的损失函数，在整个模型训练过程中，BiLSTM-CRF模型的参数不断地进行更新，使得真实标签序列得分在所有可能标签序列组合得分中的占比是最高的。因此，模型的损失函数格式如下所示：</p>
+<p>$$ LossFunction = \frac{P_{RealPath}}{P_1+P_2+…+P_N} $$</p>
+<p>那么，问题就来了：</p>
+<ul>
+<li>如何定义一个标签序列的得分？</li>
+<li>如何计算所有可能标签序列组合的总得分？</li>
+<li>在计算总得分中，一定需要计算每一个可能的标签序列的得分吗？</li>
+</ul>
+<p>接下来，我们来解答每一个问题。</p>
+<h3 id="1-4-真实标签序列得分"><a href="#1-4-真实标签序列得分" class="headerlink" title="1.4 真实标签序列得分"></a>1.4 真实标签序列得分</h3><p>前面我们定义了标签序列得分为$P_i$，以及所有可能标签序列的总得分为：</p>
+<p>$$ P_{total} = P_1 + P_2 + … + P_N = e^{S_1} + e^{S_2} + … + e^{S_N} $$ </p>
+<p>其中$e^{S_i}$表示第i个标签序列得分。</p>
+<p>显然，在所有可能的标签序列组合必然存在一个序列是真实标签序列，而剩下的标签序列组合都是错误的，比如序列”<strong>START B-Person I-Person O B-Organization O END </strong>“是正确的，而序列‘START B-Person I-Person B-Person B-Person B-Person END’是错误的。</p>
+<p>在整个模型训练过程中，CRF层的损失函数只需要两个得分：</p>
+<ul>
+<li>一个是真实标签序列得分</li>
+<li>一个是所有可能标签序列组合的总得分</li>
+</ul>
+<p>而我们的学习目的是让真实的标签序列得分在总得分中的占比是最高的。</p>
+<p>对于真实标签序列的得分$e^{S_i}$，我们直接计算$S_i$即可。</p>
+<p>我们使用之前的案例，真实的标签序列为“<strong>START B-Person I-Person O B-Organization O END </strong>”，即：</p>
+<ul>
+<li>句子$x$由5个字符组成，$w_1,w_2,w_3,w_4,w_5$</li>
+<li>我们在句子前后增加两个字符，记为$w_0,w_6$</li>
+<li>$S_i$主要由第一节中提到的Emission Score和Transition Score组成，即$S_i = Emission Score + Transition Score$</li>
+</ul>
+<h4 id="1-4-1-Emission-Score"><a href="#1-4-1-Emission-Score" class="headerlink" title="1.4.1 Emission Score"></a>1.4.1 Emission Score</h4><p>Emission Score计算公式如下所示：</p>
+<p>$Emission Score  = $</p>
+<p>$x_{0,START} + x_{1,B-Person} + x_{2,I-Person} + x_{3,O} +$</p>
+<p>$x_{4,B-Organization} + x_{5,O} + x_{6,END}$</p>
+<p>其中：</p>
+<ul>
+<li>$x_{index,label}$表示第index个词被标记为label的得分</li>
+<li>$x_{1,B-Person}, x_{2,I-Person} , x_{3,O}, x_{4,B-Organization},x_{5,O}$ 为BiLSTM层的输出</li>
+<li>一般$x_{0,START}$和$x_{6,END}$为0</li>
+</ul>
+<h4 id="1-4-2-Transition-Score"><a href="#1-4-2-Transition-Score" class="headerlink" title="1.4.2 Transition Score"></a>1.4.2 Transition Score</h4><p>Transition Score计算公式如下所示:</p>
+<p>$Transition Score  =$<br>$t_{START \rightarrow B-Person} + t_{B-Person \rightarrow I-Person} +$<br>$t_{I-Person \rightarrow O} + t_{O \rightarrow B-Organization} + t_{B-Organization \rightarrow O} + t_{O \rightarrow END}$</p>
+<p>其中:</p>
+<ul>
+<li>$t_{label1 \rightarrow label2}$ 表示$label1$到$label2$的transition Score。</li>
+<li>transition Score主要是在CRF层进行计算的，也就是说，transition Score完全是CRF层的参数。</li>
+</ul>
+<p>因此，我们通过计算$s_i$，可以得到第i条标签序列的得分。</p>
+<h3 id="1-5-所有可能标签序列组合的总得分"><a href="#1-5-所有可能标签序列组合的总得分" class="headerlink" title="1.5 所有可能标签序列组合的总得分"></a>1.5 所有可能标签序列组合的总得分</h3><p>前面，我们计算了单条标签序列得分，接下来，我们需要计算所有可能标签序列的总得分。由之前内容可知，总得分的计算公式为;</p>
+<p>$$ P_{total} = P_1 + P_2 + … + P_N = e^{S_1} + e^{S_2} + … + e^{S_N} $$ </p>
+<p>很显然，总得分计算方式就是每一条标签序列得分的求和，那么我们能想到的最简单的方法就是先计算每一条的标签序列得分，然后将所有的标签序列得分进行相加得到总得分。虽然计算很简单，但是效率不高，需要很长的训练时间。</p>
+<p>接下来,我们将通过公式推导来认识总得分计算过程。</p>
+<h3 id="1-6-CRF的损失函数"><a href="#1-6-CRF的损失函数" class="headerlink" title="1.6 CRF的损失函数"></a>1.6 CRF的损失函数</h3><p>由前面可知，CRF层的损失函数为:</p>
+<p>$$ Loss Function = \frac{P_{RealPath}}{P_1 + P_2 + … + P_N} $$</p>
+<p>我们对其对数化，即：</p>
+<p>$$ LogLossFunction = \log \frac{P_{RealPath}}{P_1 + P_2 + … + P_N} $$</p>
+<p>一般在模型训练过程中，我们希望损失函数最小化，因此，在损失函数添加一个负号，即:</p>
+<p>$Log Loss Function$<br>$= - \log \frac{P_{RealPath}}{P_1 + P_2 + … + P_N}$<br>$= - \log \frac{e^{S_{RealPath}}}{e^{S_1} + e^{S_2} + … + e^{S_N}}$<br>$= - (\log(e^{S_{RealPath}}) - \log(e^{S_1} + e^{S_2} + … + e^{S_N}))$<br>$= - (S_{RealPath} - \log(e^{S_1} + e^{S_2} + … + e^{S_N}))$<br>$= - ( \sum_{i=1}^{N} x_{iy_i} + \sum_{i=1}^{N-1} t_{y_iy_{i+1}} - \log(e^{S_1} + e^{S_2} + … + e^{S_N}))$</p>
+<p>因此，对于总得分，我们需要一个高效的方法计算:</p>
+<p>$$\log(e^{S_1} + e^{S_2} + … + e^{S_N})$$</p>
+<h4 id="1-6-1-emission-Score和transition-Score"><a href="#1-6-1-emission-Score和transition-Score" class="headerlink" title="1.6.1 emission Score和transition Score"></a>1.6.1 emission Score和transition Score</h4><p>为了简化公式，我们假设句子的长度为3，即:</p>
+<p>$x = (w_0,w_1,w_2)$</p>
+<p>假设数据集中只有两个标签，即：</p>
+<p>$LabelSet = (l_1,l_2)$</p>
+<p>则emission Score矩阵可从BiLSTM层的输出获得，即：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>$l_1$</th>
+<th>$l_2$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$w_0$</td>
+<td>$x_{01}$</td>
+<td>$x_{02}$</td>
+</tr>
+<tr>
+<td>$w_1$</td>
+<td>$x_{11}$</td>
+<td>$x_{12}$</td>
+</tr>
+<tr>
+<td>$w_2$</td>
+<td>$x_{21}$</td>
+<td>$x_{22}$</td>
+</tr>
+</tbody>
+</table>
+<p>其中$x_{ij}$为单元$w_i$被标记为$l_j$的得分。</p>
+<p>而且，我们可以从CRF层中得到transition Score矩阵，即:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>$l_1$</th>
+<th>$l_2$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$l_1$</td>
+<td>$t_{11}$</td>
+<td>$t_{12}$</td>
+</tr>
+<tr>
+<td>$l_2$</td>
+<td>$t_{21}$</td>
+<td>$t_{22}$</td>
+</tr>
+</tbody>
+</table>
+<p>其中$t_{ij}$为标签$i$到标签$j$的得分。</p>
+<h4 id="1-6-2-公式推导"><a href="#1-6-2-公式推导" class="headerlink" title="1.6.2 公式推导"></a>1.6.2 公式推导</h4><p>记住我们的目标是计算: $\log(e^{S_1} + e^{S_2} + … + e^{S_N})$</p>
+<p>很显然，我们可以使用动态规划思想进行计算（如果你不了解动态规划，没关系，本文将一步一步地进行解释，当然还是建议你学习下动态规划算法）。简而言之，首先，我们计算$w_0$的所有可能序列的总得分。接着，我们使用上一步的总得分计算$w_0 \rightarrow w_1$的总得分。最后，我们同样使用上一步的总得分计算$w_0 \rightarrow w_1 \rightarrow w_2$的总得分。最后的总得分就是我们想要的总得分。</p>
+<p>很明显，我们每一次计算都需要利用到上一步计算得到的结果，因此，接下来，你将看到两个变量:</p>
+<ul>
+<li>obs: 定义当前单元的信息</li>
+<li>previous: 存储上一步计算的最后结果</li>
+</ul>
+<hr>
+<p><strong>备注</strong>：以下内容如果看不懂的话，结合上面的emission Score矩阵和transition Score矩阵一起看就明白了</p>
+<p>首先，我们计算$w_0$:</p>
+<p>$obs = [x_{01},x_{02}]$<br>$previous = None$</p>
+<p>如果我们的句子只有一个词$w_0$，那么存储上一步结果的$previous$为$None$，另外，对于$w_0$而言，$obs = [x_{01},x_{02}]$，其中$x_{01}$和$x_{02}$分别为emission Score（ＢiLSTM层的输出）。</p>
+<p>因此，$w_0$的所有可能标签序列总得分为:</p>
+<p>$TotalScore(w_0)=\log (e^{x_{01}} + e^{x_{02}})$</p>
+<hr>
+<p>接着，我们计算$w_0 \rightarrow w_1$:</p>
+<p>$obs = [x_{11},x_{12}]$<br>$previous = [x_{01},x_{02}]$</p>
+<p>为了计算方便，我们将$previous$转变为:</p>
+<p>$$ previous =<br>\begin{pmatrix}<br>x_{01} &amp; x_{01} \<br>x_{02} &amp; x_{02}<br>\end{pmatrix}<br>$$<br>同样，将$obs$转变为:</p>
+<p>$$ obs =<br>\begin{pmatrix}<br>x_{11} &amp; x_{12} \<br>x_{11} &amp; x_{12}<br>\end{pmatrix}<br>$$<br><strong>备注</strong>：通过矩阵方式计算更高效</p>
+<p>接着，我们将$previous,abs$和transition Score进行相加,即:<br>$$<br>scores =<br>\begin{pmatrix}<br>x_{01}&amp;x_{01}\<br>x_{02}&amp;x_{02}<br>\end{pmatrix}<br>+<br>\begin{pmatrix}<br>x_{11}&amp;x_{12}\<br>x_{11}&amp;x_{12}<br>\end{pmatrix}<br>+<br>\begin{pmatrix}<br>t_{11}&amp;t_{12}\<br>t_{21}&amp;t_{22}<br>\end{pmatrix}<br>$$</p>
+<p>接着，可得到:</p>
+<p>$$<br>scores =<br>\begin{pmatrix}<br>x_{01}+x_{11}+t_{11}&amp;x_{01}+x_{12}+t_{12}\<br>x_{02}+x_{11}+t_{21}&amp;x_{02}+x_{12}+t_{22}<br>\end{pmatrix}<br>$$<br>从而我们可得到当前的$previous$为:</p>
+<p>$$previous=[\log (e^{x_{01}+x_{11}+t_{11}} + e^{x_{02}+x_{11}+t_{21}}), \log (e^{x_{01}+x_{12}+t_{12}} + e^{x_{02}+x_{12}+t_{22}})]$$</p>
+<p>实际上，第二步已经算完了，可能还有人还无法理解如何得到$w_0$到$w_1$的所有可能序列组合（$label_1 \rightarrow label_1, label_1 \rightarrow label_2 , label_2 \rightarrow label_1, label_2 \rightarrow label_2$）的总得分，其实你主要按照以下计算方式即可;</p>
+<p>$TotalScore(w_0 → w_1)$</p>
+<p>$=\log (e^{previous[0]} + e^{previous[1]})$</p>
+<p>$=\log (e^{\log(e^{x_{01}+x_{11}+t_{11}} + e^{x_{02}+x_{11}+t_{21}})}+<br>e^{\log(e^{x_{01}+x_{12}+t_{12}} + e^{x_{02}+x_{12}+t_{22}})}<br>)$</p>
+<p>$=\log(e^{x_{01}+x_{11}+t_{11}}+e^{x_{02}+x_{11}+t_{21}}+e^{x_{01}+x_{12}+t_{12}}+e^{x_{02}+x_{12}+t_{22}})$</p>
+<p>很明显，与$\log(e^{S_1} + e^{S_2} + … + e^{S_N})$很相似。</p>
+<p>在上述公式中，我们可以看到:</p>
+<ul>
+<li>$S_1 = x_{01}+x_{11}+t_{11}$ ($label_1$ → $label_1$)<ul>
+<li>$S_2 = x_{02}+x_{11}+t_{21}$ ($label_2$ → $label_1$)</li>
+<li>$S_3 = x_{01}+x_{12}+t_{12}$ ($label_1$ → $label_2$)</li>
+<li>$S_4 = x_{02}+x_{12}+t_{22}$ ($label_2$ → $label_2$)</li>
+</ul>
 </li>
-<li><p>Feeding: 使用python代码供给数据，将所有数据加载进内存，然后一个batch一个batch地输入到计算图中， 适用于小数据集；</p>
-</li>
-<li>QueueRunner: 基于队列的输入通道，读取TFrecord静态图使用；</li>
-<li>tf.data API: 能够从不同的输入或文件格式中读取、预处理数据，并且对数据应用一些变换（例如，batching、shuffling、mapping function over the dataset），tf.data API 是旧的 feeding、QueueRunner的升级。值得注意的是， Eager模式必须使用该API来构建输入通道， 一般结合TFrecord使用。该API相比于Queue更容易使用。</li>
-</ol>
-<h2 id="What‘s-TFrecord"><a href="#What‘s-TFrecord" class="headerlink" title="What‘s TFrecord"></a>What‘s TFrecord</h2><p>TFrecord是Tensorflow提供的一种二进制存储格式，可将数据和标签统一存储。从上述读取方式中可以看出，TFrecord在QueueRunner和tf.data API读取中均扮演了重要的角色。</p>
-<h2 id="Why-TFrecord"><a href="#Why-TFrecord" class="headerlink" title="Why TFrecord"></a>Why TFrecord</h2><p>与其他方案相比， 使用TFrecord读取的优点在于：</p>
-<ol>
-<li>可处理大规模数据量，而不会造成其他方案所带来的内存不够用的问题；</li>
-<li>在Feeding方案中，batch读取的IO操作势必会阻塞训练，前一个batch加载完成后，神经网络必须等待下一个batch加载完成后才能继续训练，效率较低。</li>
-</ol>
-<h2 id="How-To-Use"><a href="#How-To-Use" class="headerlink" title="How To Use"></a>How To Use</h2><p>TFrecord的使用主要有两块：一是图片数据转TFrecord格式存储，二是解析存储好的TFrecord文件。下面逐一介绍。</p>
-<h3 id="图片转TFrecord"><a href="#图片转TFrecord" class="headerlink" title="图片转TFrecord"></a>图片转TFrecord</h3><p>本文使用的数据集是Kaggle猫狗数据集。</p>
-<p>该数据集包含train和test两个文件夹， 分别为训练集和测试集，下面以train集为例操作。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ls |wc -w</span><br><span class="line"></span><br><span class="line">25000</span><br></pre></td></tr></table></figure>
-<p>训练集包含25000张图片，猫狗各一半。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ls </span><br><span class="line"></span><br><span class="line">cat.124.jpg    cat.3750.jpg  cat.6250.jpg  cat.8751.jpg  dog.11250.jpg  dog.2500.jpg   dog.5000.jpg  dog.7501.jpg</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p>图片文件以jpg格式存储，以cat， dog作为文件名开头。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">img_tfrecord_encode</span><span class="params">(classes, tfrecord_filename, data_path, is_training=True)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    功能：读取图片转换成tfrecord格式的文件</span></span><br><span class="line"><span class="string">    @params: classes: 标签类别  @type：classes: dict</span></span><br><span class="line"><span class="string">    @params: tfrecord_filename: tfrecord文件保存文件</span></span><br><span class="line"><span class="string">    @type：tfrecord_filename: str</span></span><br><span class="line"><span class="string">    @params: data_path: 原始训练集存储路径</span></span><br><span class="line"><span class="string">    @is_training: 是否为训练集，用来区分训练集和测试集</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="comment"># 初始化一个writer</span></span><br><span class="line">    writer = tf.python_io.TFRecordWriter(tfrecord_filename)</span><br><span class="line">    <span class="keyword">for</span> img_name <span class="keyword">in</span> tqdm(os.listdir(path)):</span><br><span class="line">        name = img_name.split(<span class="string">'.'</span>)[<span class="number">0</span>]</span><br><span class="line">        <span class="comment"># 使用tf.gfile.FastFile读取图片要比PIL.Image读取处理得到的</span></span><br><span class="line">        <span class="comment"># 最终TFrecod文件小得多，在本案例中，IMAGE方式读取得到的TFrecord大小约为3.7G</span></span><br><span class="line">        <span class="comment"># 而tf.gfile.FastFile得到的约为548M</span></span><br><span class="line">        <span class="keyword">with</span> tf.gfile.FastGFile(os.path.join(path, img_name), <span class="string">'rb'</span>) <span class="keyword">as</span> gf:</span><br><span class="line">            img = gf.read()</span><br><span class="line">        <span class="keyword">if</span> is_training:</span><br><span class="line">            <span class="comment"># 构造特征</span></span><br><span class="line">            feature = &#123;</span><br><span class="line">                <span class="string">'label'</span>: tf.train.Feature(int64_list=tf.train.Int64List(value=[classes[name]])),</span><br><span class="line">                <span class="string">'img_raw'</span>: tf.train.Feature(bytes_list=tf.train.BytesList(value=[img])),</span><br><span class="line">                <span class="string">'file_name'</span>: tf.train.Feature(bytes_list=tf.train.BytesList(value=[img_name.encode()]))</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            feature = &#123;</span><br><span class="line">                <span class="string">'label'</span>: tf.train.Feature(int64_list=tf.train.Int64List(value=[<span class="number">-1</span>])),</span><br><span class="line">                <span class="string">'img_raw'</span>:tf.train.Feature(bytes_list=tf.train.BytesList(value=[img])),</span><br><span class="line">                <span class="string">'file_name'</span>: tf.train.Feature(bytes_list=tf.train.BytesList(value=[img_name.encode()]))</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="comment"># example 对象将label和image特征进行封装</span></span><br><span class="line">        example = tf.train.Example(features=tf.train.Features(feature=feature))  </span><br><span class="line">        writer.write(example.SerializeToString())   <span class="comment"># 序列化为字符串</span></span><br><span class="line">    writer.close()</span><br><span class="line">    print(<span class="string">'tfrecord writen done!'</span>)</span><br></pre></td></tr></table></figure>
-<p>调用上述函数，可得到猫狗训练集的TFrecord格式文件</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    classes = &#123;<span class="string">'cat'</span>: <span class="number">0</span>, <span class="string">'dog'</span>: <span class="number">1</span>&#125;</span><br><span class="line">    tfrecord_filename = <span class="string">'cat_and_dog.tfrecord'</span></span><br><span class="line">    data_path = <span class="string">'train/'</span></span><br><span class="line">    img_tfrecord_encode(classes, tfrecord_filename, data_path, is_training=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure>
-<p>上述程序运行大约需要2min。</p>
-<h3 id="使用tf-data读取TFrecord"><a href="#使用tf-data读取TFrecord" class="headerlink" title="使用tf.data读取TFrecord"></a>使用tf.data读取TFrecord</h3><p>在动态图（eager）模式下，QueueRunner不可用，必须使用tf.data进行TFrecord的读取。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">img_tfrecord_parse</span><span class="params">(tfrecord_filename, epochs, batch_size, shape,</span></span></span><br><span class="line"><span class="function"><span class="params">                       padded_shapes=None, shuffle=True, buffer_size=<span class="number">1000</span>)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    @param: tfrecord_filename:tfrecord文件列表   @type:list</span></span><br><span class="line"><span class="string">    @param: epoch:训练轮数（repeating次数）       @type:int</span></span><br><span class="line"><span class="string">    @param：batch_size:批数据大小                @type:int</span></span><br><span class="line"><span class="string">    @param: shape:图片维度                      @type:tuple</span></span><br><span class="line"><span class="string">    @param: padded_shapes:不定长padding        @type:tuple</span></span><br><span class="line"><span class="string">    @param: shuffle:是否打乱                   @type:boolean</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">	<span class="comment"># 解析单个example，特征与encode一一对应。</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">parse_example</span><span class="params">(serialized_example)</span>:</span></span><br><span class="line">        features = tf.parse_single_example(serialized_example,</span><br><span class="line">                                           features=&#123;</span><br><span class="line">                                               <span class="string">'label'</span>: tf.FixedLenFeature([], tf.int64),</span><br><span class="line">                                               <span class="string">'img_raw'</span>: tf.FixedLenFeature([], tf.string),</span><br><span class="line">                                               <span class="string">'file_name'</span>: tf.FixedLenFeature([], tf.string)</span><br><span class="line">                                           &#125;)</span><br><span class="line">        <span class="comment"># 解码</span></span><br><span class="line">        image = tf.image.decode_jpeg(features[<span class="string">'img_raw'</span>])</span><br><span class="line">        <span class="comment"># 设置shape</span></span><br><span class="line">        image = tf.image.resize_images(image, shape, method=<span class="number">1</span>)</span><br><span class="line">        label = tf.cast(features[<span class="string">'label'</span>], tf.int64)</span><br><span class="line">        file_name = tf.cast(features[<span class="string">'file_name'</span>], tf.string)</span><br><span class="line">        <span class="keyword">return</span> image, label, file_name</span><br><span class="line">    </span><br><span class="line">	<span class="comment"># 解析TFrecord</span></span><br><span class="line">    dataset = tf.data.TFRecordDataset(tfrecord_filename).map(parse_example)</span><br><span class="line">    <span class="keyword">if</span> shuffle:</span><br><span class="line">        <span class="keyword">if</span> padded_shapes:</span><br><span class="line">            dataset = dataset.repeat(epochs).shuffle(buffer_size=buffer_size).padded_batch(batch_size, padded_shapes)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            dataset = dataset.repeat(epochs).shuffle(buffer_size=buffer_size).batch(batch_size)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">if</span> padded_shapes:</span><br><span class="line">            dataset = dataset.repeat(epochs).padded_batch(batch_size, padded_shapes)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            dataset = dataset.repeat(epochs).batch(batch_size)</span><br><span class="line">    <span class="keyword">return</span> dataset</span><br></pre></td></tr></table></figure>
-<p>调用上述函数，解析TFrecord得到dataset。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>():</span><br><span class="line">    tfrecord_filename = <span class="string">'cat_and_dog.tfrecord'</span></span><br><span class="line">    epochs = <span class="number">100</span></span><br><span class="line">    batch_size = <span class="number">64</span></span><br><span class="line">    shape = (<span class="number">227</span>, <span class="number">227</span>)</span><br><span class="line">    dataset = img_tfrecord_parse(tfrecord_filename=tfrecord_filename,</span><br><span class="line">                                epochs=epochs,</span><br><span class="line">                                batch_size=batch_size,</span><br><span class="line">                                shape=shape)</span><br><span class="line">    <span class="comment"># 查看dataset</span></span><br><span class="line">    iterator = dataset.make_one_hot_iterator()</span><br><span class="line">    image, label, file_name = iterator.get_next()</span><br><span class="line">    print(image[<span class="number">0</span>])</span><br><span class="line">    print(label[<span class="number">0</span>])</span><br><span class="line">    print(file_name[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+</ul>
+<hr>
+<p>接着我们计算$w_0$ → $w_1$ → $w_2$:</p>
+<p>如果你理解了上一步的计算过程的话，其实这一步的计算与上一步类似。即：</p>
+<p>$obs = [x_{21}, x_{22}]$</p>
+<p>$previous=[\log (e^{x_{01}+x_{11}+t_{11}} + e^{x_{02}+x_{11}+t_{21}}), \log (e^{x_{01}+x_{12}+t_{12}} + e^{x_{02}+x_{12}+t_{22}})]$</p>
+<p>类似于第二步，我们将$previous$转化为:</p>
+<p>$$<br>previous =<br>\begin{pmatrix}<br>\log (e^{x_{01}+x_{11}+t_{11}} + e^{x_{02}+x_{11}+t_{21}})&amp;\log (e^{x_{01}+x_{11}+t_{11}} + e^{x_{02}+x_{11}+t_{21}})\<br>\log (e^{x_{01}+x_{12}+t_{12}} + e^{x_{02}+x_{12}+t_{22}})&amp;\log (e^{x_{01}+x_{12}+t_{12}} + e^{x_{02}+x_{12}+t_{22}})<br>\end{pmatrix}<br>$$</p>
+<p>同样，将$obs$转化为:</p>
+<p>$$<br>obs =<br>\begin{pmatrix}<br>x_{21}&amp;x_{22}\<br>x_{21}&amp;x_{22}<br>\end{pmatrix}<br>$$</p>
+<p>将$previous，obs$和transition Score进行相加，即:</p>
+<p>$scores =$<br>$\begin{pmatrix}<br>\log (e^{x_{01}+x_{11}+t_{11}} + e^{x_{02}+x_{11}+t_{21}})&amp;\log (e^{x_{01}+x_{11}+t_{11}} + e^{x_{02}+x_{11}+t_{21}})\<br>\log (e^{x_{01}+x_{12}+t_{12}} + e^{x_{02}+x_{12}+t_{22}})&amp;\log (e^{x_{01}+x_{12}+t_{12}} + e^{x_{02}+x_{12}+t_{22}})<br>\end{pmatrix}$<br>$+$<br>$\begin{pmatrix}<br>x_{21}&amp;x_{22}\<br>x_{21}&amp;x_{22}<br>\end{pmatrix}$<br>$+$<br>$\begin{pmatrix}<br>t_{11}&amp;t_{12}\<br>t_{21}&amp;t_{22}<br>\end{pmatrix}$</p>
+<p>更新$previous$为:</p>
+<p>$previous = [\log(<br>e^{\log (e^{x_{01}+x_{11}+t_{11}} + e^{x_{02}+x_{11}+t_{21}}) + x_{22} + t_{12}}<br>+<br>e^{\log (e^{x_{01}+x_{12}+t_{12}} + e^{x_{02}+x_{12}+t_{22}}) + x_{22} + t_{22}})]$<br>$=\log( (e^{x_{01}+x_{11}+t_{11}} + e^{x_{02}+x_{11}+t_{21}})e^{x_{22} + t_{12}} + (e^{x_{01}+x_{12}+t_{12}} + e^{x_{02}+x_{12}+t_{22}})e^{x_{22} + t_{22}})]$</p>
+<p>当计算到最后一步时，我们使用新的$previous$计算总得分:</p>
+<p>$TotalScore(w_0 → w_1 → w_2)$</p>
+<p>$=\log (e^{previous[0]} + e^{previous[1]})$</p>
+<p>$=\log (e^{\log(<br>(e^{x_{01}+x_{11}+t_{11}} + e^{x_{02}+x_{11}+t_{21}})e^{x_{21} + t_{11}}<br>+<br>(e^{x_{01}+x_{12}+t_{12}} + e^{x_{02}+x_{12}+t_{22}})e^{x_{21} + t_{21}}<br>)}$</p>
+<p>$+e^{\log(<br>(e^{x_{01}+x_{11}+t_{11}} + e^{x_{02}+x_{11}+t_{21}})e^{x_{22} + t_{12}}<br>+<br>(e^{x_{01}+x_{12}+t_{12}} + e^{x_{02}+x_{12}+t_{22}})e^{x_{22} + t_{22}})}<br>)$</p>
+<p>$=\log (e^{x_{01}+x_{11}+t_{11}+x_{21}+t_{11}}+e^{x_{02}+x_{11}+t_{21}+x_{21}+t_{11}}$<br>$+e^{x_{01}+x_{12}+t_{12}+x_{21}+t_{21}}+e^{x_{02}+x_{12}+t_{22}+x_{21}+t_{21}}$<br>$+e^{x_{01}+x_{11}+t_{11}+x_{22}+t_{12}}+e^{x_{02}+x_{11}+t_{21}+x_{22}+t_{12}}$<br>$+e^{x_{01}+x_{12}+t_{12}+x_{22}+t_{22}}+e^{x_{02}+x_{12}+t_{22}+x_{22}+t_{22}})$</p>
+<hr>
+<p>到这里，我们就完成 了$\log(e^{S_1} + e^{S_2} + … + e^{S_N})$的计算过程。</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[1] Lample, G., Ballesteros, M., Subramanian, S., Kawakami, K. and Dyer, C., 2016. Neural architectures for named entity recognition. arXiv preprint arXiv:1603.01360.<br><a href="https://arxiv.org/abs/1603.01360" target="_blank" rel="noopener">https://arxiv.org/abs/1603.01360</a></p>
 
       
     </div>
@@ -512,7 +781,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://state-of-art.top/2018/10/27/TFrecord在动态图中的使用/" title="图像数据-TFrecord在动态图中的使用">http://state-of-art.top/2018/10/27/TFrecord在动态图中的使用/</a>
+    <a href="http://state-of-art.top/2018/12/31/CRF-Layer-on-the-Top-of-BiLSTM+--2/" title="BiLSTM模型中CRF层的运行原理(二)">http://state-of-art.top/2018/12/31/CRF-Layer-on-the-Top-of-BiLSTM+--2/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -527,7 +796,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Tensorflow/" rel="tag"># Tensorflow</a>
+            <a href="/tags/NER/" rel="tag"># NER</a>
+          
+            <a href="/tags/深度学习/" rel="tag"># 深度学习</a>
+          
+            <a href="/tags/CRF/" rel="tag"># CRF</a>
           
         </div>
       
@@ -540,8 +813,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/07/06/CRF-Layer-on-the-Top-of-BiLSTM+--1/" rel="next" title="BiLSTM模型中CRF层的运行原理(一)">
-                <i class="fa fa-chevron-left"></i> BiLSTM模型中CRF层的运行原理(一)
+              <a href="/2018/11/30/浅析pytorch中的LSTM(GRU) /" rel="next" title="浅析pytorch中的LSTM(GRU)">
+                <i class="fa fa-chevron-left"></i> 浅析pytorch中的LSTM(GRU)
               </a>
             
           </div>
@@ -550,8 +823,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/10/28/周期性学习率技术/" rel="prev" title="周期性学习率(Cyclical Learning Rate)技术">
-                周期性学习率(Cyclical Learning Rate)技术 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/12/31/CRF-Layer-on-the-Top-of-BiLSTM+--3/" rel="prev" title="BiLSTM模型中CRF层的运行原理(三)">
+                BiLSTM模型中CRF层的运行原理(三) <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -738,7 +1011,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#What‘s-TFrecord"><span class="nav-number">1.</span> <span class="nav-text">What‘s TFrecord</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Why-TFrecord"><span class="nav-number">2.</span> <span class="nav-text">Why TFrecord</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#How-To-Use"><span class="nav-number">3.</span> <span class="nav-text">How To Use</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#图片转TFrecord"><span class="nav-number">3.1.</span> <span class="nav-text">图片转TFrecord</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用tf-data读取TFrecord"><span class="nav-number">3.2.</span> <span class="nav-text">使用tf.data读取TFrecord</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-CRF层"><span class="nav-number">1.</span> <span class="nav-text">1.CRF层</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-emission-score"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 emission score</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-Transition-score"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 Transition score</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-CRF损失函数"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 CRF损失函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-真实标签序列得分"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 真实标签序列得分</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-4-1-Emission-Score"><span class="nav-number">1.4.1.</span> <span class="nav-text">1.4.1 Emission Score</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-4-2-Transition-Score"><span class="nav-number">1.4.2.</span> <span class="nav-text">1.4.2 Transition Score</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-5-所有可能标签序列组合的总得分"><span class="nav-number">1.5.</span> <span class="nav-text">1.5 所有可能标签序列组合的总得分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-6-CRF的损失函数"><span class="nav-number">1.6.</span> <span class="nav-text">1.6 CRF的损失函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-6-1-emission-Score和transition-Score"><span class="nav-number">1.6.1.</span> <span class="nav-text">1.6.1 emission Score和transition Score</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-6-2-公式推导"><span class="nav-number">1.6.2.</span> <span class="nav-text">1.6.2 公式推导</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文献"><span class="nav-number">2.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
             
 
           </div>

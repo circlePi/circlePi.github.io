@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#fff">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.lug.ustc.edu.cn/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Damion:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#fff">
+
+
+
+
+
+  <meta name="keywords" content="NER,深度学习,CRF,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="circlepi's blog" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="CRF ON THE TOP OF BILSTM（四） 代码实现概述前面我们重点介绍了CRF的原理，损失函数以及分数的计算。本节将结合前面的相关内容，介绍BILSTM+CRF代码实现（pytorch 0.4.0）及一些需要注意的细节。 模型总览BILSTM+CRF模型由BILSTM， CRF， 损失函数， 预测函数几部分组成。BILSTM的输出作为CRF的输入，损失函数定义在CRF中， 损失函数使">
+<meta name="keywords" content="NER,深度学习,CRF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BiLSTM模型中CRF层的代码实现（四）">
+<meta property="og:url" content="http://state-of-art.top/2018/07/06/BiLSTM模型中CRF层的运行原理（四） 代码实现/index.html">
+<meta property="og:site_name" content="circlepi&#39;s blog">
+<meta property="og:description" content="CRF ON THE TOP OF BILSTM（四） 代码实现概述前面我们重点介绍了CRF的原理，损失函数以及分数的计算。本节将结合前面的相关内容，介绍BILSTM+CRF代码实现（pytorch 0.4.0）及一些需要注意的细节。 模型总览BILSTM+CRF模型由BILSTM， CRF， 损失函数， 预测函数几部分组成。BILSTM的输出作为CRF的输入，损失函数定义在CRF中， 损失函数使">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-12-31T07:31:22.309Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="BiLSTM模型中CRF层的代码实现（四）">
+<meta name="twitter:description" content="CRF ON THE TOP OF BILSTM（四） 代码实现概述前面我们重点介绍了CRF的原理，损失函数以及分数的计算。本节将结合前面的相关内容，介绍BILSTM+CRF代码实现（pytorch 0.4.0）及一些需要注意的细节。 模型总览BILSTM+CRF模型由BILSTM， CRF， 损失函数， 预测函数几部分组成。BILSTM的输出作为CRF的输入，损失函数定义在CRF中， 损失函数使">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://state-of-art.top/2018/07/06/BiLSTM模型中CRF层的运行原理（四） 代码实现/">
+
+
+
+
+
+  <title>BiLSTM模型中CRF层的代码实现（四） | circlepi's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">circlepi's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Even with an intractable probelm, one can find a way to do the right thing.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+<script type="text/javascript" src="/lib/zclip/clipboard.js"></script>	
+<script type="text/javascript" src="/js/src/custom.js"></script>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://state-of-art.top/2018/07/06/BiLSTM模型中CRF层的运行原理（四） 代码实现/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="circlepi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/touxiang.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="circlepi's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">BiLSTM模型中CRF层的代码实现（四）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-06T23:27:08+08:00">
+                2018-07-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/深度学习/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/深度学习/自然语言处理/" itemprop="url" rel="index">
+                    <span itemprop="name">自然语言处理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/06/BiLSTM模型中CRF层的运行原理（四） 代码实现/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/07/06/BiLSTM模型中CRF层的运行原理（四） 代码实现/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.7k
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="CRF-ON-THE-TOP-OF-BILSTM（四）-代码实现"><a href="#CRF-ON-THE-TOP-OF-BILSTM（四）-代码实现" class="headerlink" title="CRF ON THE TOP OF BILSTM（四） 代码实现"></a>CRF ON THE TOP OF BILSTM（四） 代码实现</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>前面我们重点介绍了CRF的原理，损失函数以及分数的计算。本节将结合前面的相关内容，介绍BILSTM+CRF代码实现（pytorch 0.4.0）及一些需要注意的细节。</p>
+<h2 id="模型总览"><a href="#模型总览" class="headerlink" title="模型总览"></a>模型总览</h2><p>BILSTM+CRF模型由BILSTM， CRF， 损失函数， 预测函数几部分组成。BILSTM的输出作为CRF的输入，损失函数定义在CRF中， 损失函数使用前向算法，预测函数使用Viterbi算法，下面逐一介绍。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BISLTM_CRF</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,</span></span></span><br><span class="line"><span class="function"><span class="params">                 vocab_size,</span></span></span><br><span class="line"><span class="function"><span class="params">                 word_embedding_dim,</span></span></span><br><span class="line"><span class="function"><span class="params">                 word2id,</span></span></span><br><span class="line"><span class="function"><span class="params">                 hidden_size, bi_flag,</span></span></span><br><span class="line"><span class="function"><span class="params">                 num_layer, input_size,</span></span></span><br><span class="line"><span class="function"><span class="params">                 cell_type, dropout,</span></span></span><br><span class="line"><span class="function"><span class="params">                 num_tag, checkpoint_dir)</span>:</span></span><br><span class="line">        super(BISLTM_CRF, self).__init__()</span><br><span class="line"></span><br><span class="line">        self.embedding = nn.Embedding(vocab_size, word_embedding_dim)</span><br><span class="line">        <span class="keyword">for</span> p <span class="keyword">in</span> self.embedding.parameters():</span><br><span class="line">            p.requires_grad = <span class="keyword">False</span></span><br><span class="line">        self.embedding.weight.data.copy_(torch.from_numpy(get_embedding(vocab_size,</span><br><span class="line">                                                                        word_embedding_dim,</span><br><span class="line">                                                                        word2id)))</span><br><span class="line"></span><br><span class="line">        self.rnn = RNN(hidden_size, bi_flag,</span><br><span class="line">                       num_layer, input_size,</span><br><span class="line">                       cell_type, dropout, num_tag)</span><br><span class="line"></span><br><span class="line">        self.crf = CRF(num_tag=num_tag)</span><br><span class="line"></span><br><span class="line">        self.checkpoint_dir = checkpoint_dir</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, inputs, length)</span>:</span></span><br><span class="line">        embeddings = self.embedding(inputs)</span><br><span class="line">        rnn_output = self.rnn(embeddings, length)     <span class="comment"># (batch_size, time_steps, num_tag+2)</span></span><br><span class="line">        <span class="keyword">return</span> rnn_output</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">loss_fn</span><span class="params">(self, rnn_output, labels, length)</span>:</span></span><br><span class="line">        loss = self.crf.negative_log_loss(inputs=rnn_output, length=length, tags=labels)</span><br><span class="line">        <span class="keyword">return</span> loss</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">predict</span><span class="params">(self, rnn_output, length)</span>:</span></span><br><span class="line">        best_path = self.crf.get_batch_best_path(rnn_output, length)</span><br><span class="line">        <span class="keyword">return</span> best_path</span><br></pre></td></tr></table></figure>
+<h2 id="BILSTM"><a href="#BILSTM" class="headerlink" title="BILSTM"></a>BILSTM</h2><p>BILSTM模型这里采用的是双向GRU。GRU的输出（维度为 batch_size <em> time_steps </em> hidden_size）经过线性层（hidden_size <em> num_tag）变为(batch_size </em> time_steps <em> num_tag), 这是最终的输出结果。其中，hidden_size是GRU隐藏层个数</em>2(因为是双向)， num_tag 为需要标注的标签个数。</p>
+<h2 id="CRF"><a href="#CRF" class="headerlink" title="CRF"></a>CRF</h2><h3 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h3><p>对于一个句子，损失函数为这个句子的所有可能的路径分数之和减去真实路径分数。值得注意的是，这里的“路径”指的句子中的有小部分，不包括padding部分。</p>
+<p>对于一个batch，我们将所有句子的损失函数相加，然后除以总的句子长度，将损失分配到每个字上，作为训练的损失函数。</p>
+<p>这里的重点在于计算真实路径分数和所有路径分数之和，下面来看。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">negative_log_loss</span><span class="params">(self, inputs, length, tags)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    features:(batch_size, time_step, num_tag)</span></span><br><span class="line"><span class="string">    target_function = P_real_path_score/P_all_possible_path_score</span></span><br><span class="line"><span class="string">                    = exp(S_real_path_score)/ sum(exp(certain_path_score))</span></span><br><span class="line"><span class="string">    我们希望P_real_path_score的概率越高越好，即target_function的值越大越好</span></span><br><span class="line"><span class="string">    因此，loss_function取其相反数，越小越好</span></span><br><span class="line"><span class="string">    loss_function = -log(target_function)</span></span><br><span class="line"><span class="string">                  = -S_real_path_score + log(exp(S_1 + exp(S_2) + exp(S_3) + ...))</span></span><br><span class="line"><span class="string">                  = -S_real_path_score + log(all_possible_path_score)</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> self.use_cuda:</span><br><span class="line">        inputs = inputs.cpu()</span><br><span class="line">        length = length.cpu()</span><br><span class="line">        tags = tags.cpu()</span><br><span class="line"></span><br><span class="line">    loss = Variable(torch.tensor(<span class="number">0.</span>), requires_grad=<span class="keyword">True</span>)</span><br><span class="line">    num_chars = torch.sum(length.data).float()      <span class="comment"># 所有字的个数</span></span><br><span class="line">    <span class="keyword">for</span> ix, (features, tag) <span class="keyword">in</span> enumerate(zip(inputs, tags)):</span><br><span class="line">        features = features[:length[ix]]</span><br><span class="line">        tag = tag[:length[ix]]</span><br><span class="line">        real_score = self.real_path_score(features, tag)      <span class="comment"># 真实路径分数</span></span><br><span class="line">        total_score = self.all_possible_path_score(features)  <span class="comment"># 所有可能的路径分数</span></span><br><span class="line">        cost = total_score - real_score</span><br><span class="line">        loss  = loss + cost</span><br><span class="line">    <span class="keyword">return</span> loss/num_chars             <span class="comment"># 分配到每个字的损失</span></span><br></pre></td></tr></table></figure>
+<h3 id="转移矩阵"><a href="#转移矩阵" class="headerlink" title="转移矩阵"></a>转移矩阵</h3><p>在介绍分数计算之前，先来看下CRF中的一个重要的训练参数，转移矩阵。转移矩阵的定义决定了后面前向算法和维特比算法的实现，因此十分重要。</p>
+<p>我们的标签序列id映射定义为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">tag_to_ix = &#123;</span><br><span class="line">    <span class="string">"B_PER"</span>: <span class="number">0</span>,   <span class="comment"># 人名</span></span><br><span class="line">    <span class="string">"I_PER"</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="string">"B_LOC"</span>: <span class="number">2</span>,   <span class="comment"># 地点</span></span><br><span class="line">    <span class="string">"I_LOC"</span>: <span class="number">3</span>,</span><br><span class="line">    <span class="string">"B_ORG"</span>: <span class="number">4</span>,   <span class="comment"># 机构</span></span><br><span class="line">    <span class="string">"I_ORG"</span>: <span class="number">5</span>,</span><br><span class="line">    <span class="string">"B_T"</span>: <span class="number">6</span>,     <span class="comment"># 时间</span></span><br><span class="line">    <span class="string">"I_T"</span>: <span class="number">7</span>,</span><br><span class="line">    <span class="string">"O"</span>: <span class="number">8</span>,       <span class="comment"># 其他</span></span><br><span class="line">    <span class="string">"SOS"</span>: <span class="number">9</span>,     <span class="comment"># 起始符</span></span><br><span class="line">    <span class="string">"EOS"</span>:<span class="number">10</span>      <span class="comment"># 结束符</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>转移矩阵的大小为：(num_tag +2, num_tag +2)。+2是因为包含了起始符号和结束符号。</p>
+<p>并且，P_jk 表示从tag_j到tag_k的分数，这样就有：</p>
+<p>（1）P_j* 表示所有从tag_j出发的边</p>
+<p>（2） P_*k 表示所有到tag_k的边</p>
+<p>此外，在均匀初始化时，设定起始符号和结束符号对应的转移分数，使得：</p>
+<p>（1） 从EOS-&gt;其他标签为不可能事件, 如果发生，则产生一个极大的损失</p>
+<p>（2） 从其他标签-&gt;SOS为不可能事件，如果发生，则产生一个极大的损失</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, num_tag, use_cuda=False)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> num_tag &lt;= <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">"Invalid value of num_tag: %d"</span> % num_tag)</span><br><span class="line">    super(CRF, self).__init__()</span><br><span class="line">    self.num_tag = num_tag</span><br><span class="line">    self.start_tag = num_tag</span><br><span class="line">    self.end_tag = num_tag + <span class="number">1</span></span><br><span class="line">    self.use_cuda = use_cuda</span><br><span class="line">    <span class="comment"># 转移矩阵transitions：P_jk 表示从tag_j到tag_k的分数</span></span><br><span class="line">    <span class="comment"># P_j* 表示所有从tag_j出发的边</span></span><br><span class="line">    <span class="comment"># P_*k 表示所有到tag_k的边</span></span><br><span class="line">    self.transitions = nn.Parameter(torch.Tensor(num_tag + <span class="number">2</span>, num_tag + <span class="number">2</span>))</span><br><span class="line">    nn.init.uniform_(self.transitions, <span class="number">-0.1</span>, <span class="number">0.1</span>)</span><br><span class="line">    self.transitions.data[self.end_tag, :] = <span class="number">-10000</span>   <span class="comment"># 表示从EOS-&gt;其他标签为不可能事件, 如果发生，则产生一个极大的损失</span></span><br><span class="line">    self.transitions.data[:, self.start_tag] = <span class="number">-10000</span>   <span class="comment"># 表示从其他标签-&gt;SOS为不可能事件, 同上</span></span><br></pre></td></tr></table></figure>
+<h3 id="真实路径分数"><a href="#真实路径分数" class="headerlink" title="真实路径分数"></a>真实路径分数</h3><p>真实路径分数由发射分数和转移分数组成。其中，转移分数是CRF需要训练的参数，我们随机初始化；发射分数是BISTLM的输出矩阵（对于每个句子，其维度为 time_steps * num_tag）， 对于每个tag， 该矩阵都给出一个分数，我们知道了真实的标签序列， 拿这个标签去索引该矩阵，即可得到真实路径的发射分数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">real_path_score</span><span class="params">(self, features, tags)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    features: (time_steps, num_tag)</span></span><br><span class="line"><span class="string">    real_path_score表示真实路径分数</span></span><br><span class="line"><span class="string">    它由Emission score和Transition score两部分相加组成</span></span><br><span class="line"><span class="string">    Emission score由LSTM输出结合真实的tag决定，表示我们希望由输出得到真实的标签</span></span><br><span class="line"><span class="string">    Transition score则是crf层需要进行训练的参数，它是随机初始化的，表示标签序列前后间的约束关系（转移概率）</span></span><br><span class="line"><span class="string">    Transition矩阵存储的是标签序列相互间的约束关系</span></span><br><span class="line"><span class="string">    在训练的过程中，希望real_path_score最高，因为这是所有路径中最可能的路径</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    r = torch.LongTensor(range(features.size(<span class="number">0</span>)))</span><br><span class="line">    <span class="keyword">if</span> self.use_cuda:</span><br><span class="line">        pad_start_tags = torch.cat([torch.cuda.LongTensor([self.start_tag]), tags])</span><br><span class="line">        pad_stop_tags = torch.cat([tags, torch.cuda.LongTensor([self.end_tag])])</span><br><span class="line">        r = r.cuda()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        pad_start_tags = torch.cat([torch.LongTensor([self.start_tag]), tags])</span><br><span class="line">        pad_stop_tags = torch.cat([tags, torch.LongTensor([self.end_tag])])</span><br><span class="line">    <span class="comment"># Transition score + Emission score</span></span><br><span class="line">    score = torch.sum(self.transitions[pad_start_tags, pad_stop_tags]).cpu() + torch.sum(features[r, tags])</span><br><span class="line">    <span class="keyword">return</span> score</span><br></pre></td></tr></table></figure>
+<h3 id="所有路径分数之和"><a href="#所有路径分数之和" class="headerlink" title="所有路径分数之和"></a>所有路径分数之和</h3><p>所有路径分数之和采用前向算法计算，算法复杂度为O(N <em> N </em> T)， 其中N为标签个数，T为序列长度。</p>
+<p>这里， 将start_tag的发射分数初始化为0，从start_tag开始，沿着序列一个字一个字地计算前向分数。</p>
+<p>最后，加上end_tag的转移分数，即为所有START_TAG -&gt; 1st word -&gt; 2nd word -&gt;…-&gt;END_TAG的分数。</p>
+<p>事实上，前向算法的精髓在于，用指数将每个字的分数用三个数存起来，而这三个数后面又是可以拆分的(指数的计算特性，乘法拆成加法。）ps：如果对前向算法不是很明白或者大致明白但不是特别清晰，建议画个图看下就一目了然了。</p>
+<p>需要注意的是，根据前向算法，需要计算指数和的log， log_sum_exp， 由于前向方法是一个不断累积的过程， 会导致exp之和趋于无穷大，超过计算机的浮点数最大值限制，出现“上溢”。避免这种做法的手段是，找到整个矩阵的最大值，将矩阵减去该最大值进行指数求和，最终结果再加上该最大值即可。减去最大值后求指数和尽管也会出现无穷大的情况，但是这时是在分母上，该项可以计算为0，这样我们取log后仍可以得到一个合理的数值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">all_possible_path_score</span><span class="params">(self, features)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    计算所有可能的路径分数的log和：前向算法</span></span><br><span class="line"><span class="string">    step1: 将forward列expand成9*9</span></span><br><span class="line"><span class="string">    step2: 将下个单词的emission行expand成9*9</span></span><br><span class="line"><span class="string">    step3: 将1和2和对应位置的转移矩阵相加</span></span><br><span class="line"><span class="string">    step4: 更新forward，合并行</span></span><br><span class="line"><span class="string">    step5: 取forward指数的对数计算total</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    time_steps = features.size(<span class="number">0</span>)</span><br><span class="line">    <span class="comment"># 初始化</span></span><br><span class="line">    forward = Variable(torch.zeros(self.num_tag))     <span class="comment"># 初始化START_TAG的发射分数为0</span></span><br><span class="line">    <span class="keyword">if</span> self.use_cuda:</span><br><span class="line">        forward = forward.cuda()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, time_steps):  <span class="comment"># START_TAG -&gt; 1st word -&gt; 2nd word -&gt;...-&gt;END_TAG</span></span><br><span class="line">        emission_start = forward.expand(self.num_tag, self.num_tag).t()</span><br><span class="line">        emission_end = features[i,:].expand(self.num_tag, self.num_tag)</span><br><span class="line">        <span class="keyword">if</span> i == <span class="number">0</span>:</span><br><span class="line">            trans_score = self.transitions[self.start_tag, :self.start_tag].cpu()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            trans_score = self.transitions[:self.start_tag, :self.start_tag].cpu()</span><br><span class="line">        sum = emission_start + emission_end + trans_score</span><br><span class="line">        forward = log_sum(sum, dim=<span class="number">0</span>)</span><br><span class="line">    forward = forward + self.transitions[:self.start_tag, self.end_tag].cpu()  <span class="comment"># END_TAG</span></span><br><span class="line">    total_score = log_sum(forward, dim=<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> total_score</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">log_sum</span><span class="params">(matrix, dim)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    前向算法是不断累积之前的结果，这样就会有个缺点</span></span><br><span class="line"><span class="string">    指数和累积到一定程度后，会超过计算机浮点值的最大值，变成inf，这样取log后也是inf</span></span><br><span class="line"><span class="string">    为了避免这种情况，我们做了改动：</span></span><br><span class="line"><span class="string">    1. 用一个合适的值clip去提指数和的公因子，这样就不会使某项变得过大而无法计算</span></span><br><span class="line"><span class="string">    SUM = log(exp(s1)+exp(s2)+...+exp(s100))</span></span><br><span class="line"><span class="string">        = log&#123;exp(clip)*[exp(s1-clip)+exp(s2-clip)+...+exp(s100-clip)]&#125;</span></span><br><span class="line"><span class="string">        = clip + log[exp(s1-clip)+exp(s2-clip)+...+exp(s100-clip)]</span></span><br><span class="line"><span class="string">    where clip=max</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    clip_value = torch.max(matrix)                 <span class="comment"># 极大值</span></span><br><span class="line">    clip_value = int(clip_value.data.tolist())</span><br><span class="line">    log_sum_value = clip_value + torch.log(torch.sum(torch.exp(matrix-clip_value), dim=dim))</span><br><span class="line">    <span class="keyword">return</span> log_sum_value</span><br></pre></td></tr></table></figure>
+<p>整个训练部分至此就介绍完了。下面介绍使用维特比算法进行预测。</p>
+<h3 id="预测"><a href="#预测" class="headerlink" title="预测"></a>预测</h3><p>预测算法迭代过程和前向算法类似。不同的是，forward不再是到该点的路径分数之和，而是到该点的所有路径中最大分数， 这样我们就有了到该点的最大路径。同时，在迭代过程中 ，我们将最大路径中到当前节点（具有最大分数）的前一个节点的索引存储下来，作为最佳路径点。</p>
+<p>中间的迭代过程较容易理解，比较绕的是</p>
+<p>（1） 如何处理起始符号和结束符号</p>
+<p>（2） 最后一个节点怎么找</p>
+<p>我们只需要把握一个点，上面的问题就能迎刃而解：</p>
+<p>预测和回溯的时候，我们要从START_TAG -&gt; 1st word -&gt; 2nd word -&gt;…-&gt;END_TAG，一个都不能少！</p>
+<p>最后奉上一份PPT<url><a href="https://baidupan.com，" target="_blank" rel="noopener">https://baidupan.com，</a> 里面用图形化的方式对CRF原理进行了详细的描述。</url></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">viterbi</span><span class="params">(self, features)</span>:</span></span><br><span class="line">        time_steps = features.size(<span class="number">0</span>)</span><br><span class="line">        forward = Variable(torch.zeros(self.num_tag))  <span class="comment"># START_TAG</span></span><br><span class="line">        <span class="keyword">if</span> self.use_cuda:</span><br><span class="line">            forward = forward.cuda()</span><br><span class="line">        <span class="comment"># back_points 到该点的最大分数  last_points 前一个点的索引</span></span><br><span class="line">        back_points, index_points = [self.transitions[self.start_tag, :self.start_tag].cpu()], [torch.LongTensor([<span class="number">-1</span>]).expand_as(forward)]</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, time_steps):  <span class="comment"># START_TAG -&gt; 1st word -&gt; 2nd word -&gt;...-&gt;END_TAG</span></span><br><span class="line">            emission_start = forward.expand(self.num_tag, self.num_tag).t()</span><br><span class="line">            emission_end = features[i,:].expand(self.num_tag, self.num_tag)</span><br><span class="line">            trans_score = self.transitions[:self.start_tag, :self.start_tag].cpu()</span><br><span class="line">            sum = emission_start + emission_end + trans_score</span><br><span class="line">            forward, index = torch.max(sum.detach(), dim=<span class="number">0</span>)</span><br><span class="line">            back_points.append(forward)</span><br><span class="line">            index_points.append(index)</span><br><span class="line">        back_points.append(forward + self.transitions[:self.start_tag, self.end_tag].cpu())  <span class="comment"># END_TAG</span></span><br><span class="line">        <span class="keyword">return</span> back_points, index_points</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_best_path</span><span class="params">(self, features)</span>:</span></span><br><span class="line">        back_points, index_points = self.viterbi(features)</span><br><span class="line">        <span class="comment"># 找到线头</span></span><br><span class="line">        best_last_point = argmax(back_points[<span class="number">-1</span>])</span><br><span class="line">        index_points = torch.stack(index_points)   <span class="comment"># 堆成矩阵</span></span><br><span class="line">        m = index_points.size(<span class="number">0</span>)</span><br><span class="line">        <span class="comment"># 初始化矩阵</span></span><br><span class="line">        best_path = [best_last_point]</span><br><span class="line">        <span class="comment"># 循着线头找到其对应的最佳路径</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(m<span class="number">-1</span>, <span class="number">0</span>, <span class="number">-1</span>):</span><br><span class="line">            best_index_point = index_points[i][best_last_point]</span><br><span class="line">            best_path.append(best_index_point)</span><br><span class="line">            best_last_point = best_index_point</span><br><span class="line">        best_path.reverse()</span><br><span class="line">        <span class="keyword">return</span> best_path</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_batch_best_path</span><span class="params">(self, inputs, length)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.use_cuda:</span><br><span class="line">            inputs = inputs.cpu()</span><br><span class="line">            length = length.cpu()</span><br><span class="line">        max_len = inputs.size(<span class="number">1</span>)</span><br><span class="line">        batch_best_path = []</span><br><span class="line">        <span class="keyword">for</span> ix, features <span class="keyword">in</span> enumerate(inputs):</span><br><span class="line">            features = features[:length[ix]]</span><br><span class="line">            best_path = self.get_best_path(features)</span><br><span class="line">            best_path = torch.Tensor(best_path).long()</span><br><span class="line">            best_path = padding(best_path, max_len)</span><br><span class="line">            batch_best_path.append(best_path)</span><br><span class="line">        batch_best_path = torch.stack(batch_best_path, dim=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> batch_best_path</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">argmax</span><span class="params">(matrix, dim=<span class="number">0</span>)</span>:</span></span><br><span class="line">    <span class="string">"""(0.5, 0.4, 0.3) —&gt; 0"""</span></span><br><span class="line">    _, index = torch.max(matrix, dim=dim)</span><br><span class="line">    <span class="keyword">return</span> index</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">padding</span><span class="params">(vec, max_len, pad_token=<span class="number">-1</span>)</span>:</span></span><br><span class="line">    new_vec = torch.zeros(max_len).long()</span><br><span class="line">    new_vec[:vec.size(<span class="number">0</span>)] = vec</span><br><span class="line">    new_vec[vec.size(<span class="number">0</span>):] = pad_token</span><br><span class="line">    <span class="keyword">return</span> new_vec</span><br></pre></td></tr></table></figure>
+<p>完整代码请戳 <a href="https://github.com/circlePi/NER/BILSTM_CRF" target="_blank" rel="noopener">https://github.com/circlePi/NER/BILSTM_CRF</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    circlepi
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://state-of-art.top/2018/07/06/BiLSTM模型中CRF层的运行原理（四） 代码实现/" title="BiLSTM模型中CRF层的代码实现（四）">http://state-of-art.top/2018/07/06/BiLSTM模型中CRF层的运行原理（四） 代码实现/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/NER/" rel="tag"># NER</a>
+          
+            <a href="/tags/深度学习/" rel="tag"># 深度学习</a>
+          
+            <a href="/tags/CRF/" rel="tag"># CRF</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/06/TORCHTEXT读取JSON数据/" rel="prev" title="Torchtext读取JSON数据">
+                Torchtext读取JSON数据 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpeg" alt="circlepi">
+            
+              <p class="site-author-name" itemprop="name">circlepi</p>
+              <p class="site-description motion-element" itemprop="description">饮钱江水，恋皖南家</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/circlePi" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto circlepi.top@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://weibo.com/fly51fly" title="爱可可爱生活" target="_blank">爱可可爱生活</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.jiqizhixin.com/" title="机器之心" target="_blank">机器之心</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://lonepatient.top/" title="lonepatient" target="_blank">lonepatient</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.kaggle.com/" title="Kaggle" target="_blank">Kaggle</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CRF-ON-THE-TOP-OF-BILSTM（四）-代码实现"><span class="nav-number">1.</span> <span class="nav-text">CRF ON THE TOP OF BILSTM（四） 代码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模型总览"><span class="nav-number">1.2.</span> <span class="nav-text">模型总览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BILSTM"><span class="nav-number">1.3.</span> <span class="nav-text">BILSTM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CRF"><span class="nav-number">1.4.</span> <span class="nav-text">CRF</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#损失函数"><span class="nav-number">1.4.1.</span> <span class="nav-text">损失函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#转移矩阵"><span class="nav-number">1.4.2.</span> <span class="nav-text">转移矩阵</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#真实路径分数"><span class="nav-number">1.4.3.</span> <span class="nav-text">真实路径分数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#所有路径分数之和"><span class="nav-number">1.4.4.</span> <span class="nav-text">所有路径分数之和</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#预测"><span class="nav-number">1.4.5.</span> <span class="nav-text">预测</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+ <span class="with-love" id="heart">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">circlepi</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<div> 
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> 本站总访问量 <span id="busuanzi_value_site_pv"></span> 次
+</div>  
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共22k字</span>
+</div>
+
+<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1275169677'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s13.cnzz.com/z_stat.php%3Fid%3D1275169677%26show%3Dpic2' type='text/javascript'%3E%3C/script%3E"));</script>
+</div>
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </footer></div>
+    
+
+    
+
+    
+
+  
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'bV2cKuAP9eAIiQLrXrqrEHui-gzGzoHsz',
+        appKey: 'Tb0BblyR6jqQCdJ0acSzfJr2',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+
+<!-- 代码块复制功能 -->
+<script type="text/javascript" src="/js/src/clipboard.min.js"></script>  
+<script type="text/javascript" src="/js/src/clipboard-use.js"></script>
+</body>
+</html>
