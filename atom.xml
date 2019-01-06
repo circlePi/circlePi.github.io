@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://state-of-art.top/"/>
-  <updated>2018-12-31T07:38:16.994Z</updated>
+  <updated>2019-01-06T13:06:21.638Z</updated>
   <id>http://state-of-art.top/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>BERT解读(一) self——attention</title>
+    <link href="http://state-of-art.top/2019/01/06/BERT%E8%A7%A3%E8%AF%BB(%E4%B8%80)self-Attention/"/>
+    <id>http://state-of-art.top/2019/01/06/BERT解读(一)self-Attention/</id>
+    <published>2019-01-06T15:30:08.000Z</published>
+    <updated>2019-01-06T13:06:21.638Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="BERT解读（一）self-Attention"><a href="#BERT解读（一）self-Attention" class="headerlink" title="BERT解读（一）self-Attention"></a>BERT解读（一）self-Attention</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。</p><p>讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它另辟蹊径，采用的是attention机制对文本序列进行特征提取。</p><p>所以我们从self-Attention出发。</p><p>文章内容参考<a href="https://jalammar.github.io/illustrated-transformer/，jalammar的博客十分通俗易懂，且切中要害，本系列内容不乏很多翻译自jalammar的博客。" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/，jalammar的博客十分通俗易懂，且切中要害，本系列内容不乏很多翻译自jalammar的博客。</a></p><h2 id="Attention-is-all-your-need"><a href="#Attention-is-all-your-need" class="headerlink" title="Attention is all your need"></a>Attention is all your need</h2><p>尽管attention机制由来已久，但真正令其声名大噪的是google 2017年的这篇名为《attention is all your need》的论文。</p><p>让我们从一个简单的例子看起：</p><p>假设我们想用机器翻译的手段将下面这句话翻译成中文：</p><p>“The animal didn’t cross the street because it was too tired”</p><p>当机器读到“it”时，“it”代表“animal”还是“street”呢？对于人类来讲，这是一个极其简单的问题，但是对于机器或者说算法来讲却十分不容易。</p><p>self-Attention则是处理此类问题的一个解决方案，也是目前看起来一个比较好的方案。当模型处理到“it”时，self-Attention可以将“it”和“animal‘联系到一起。</p><p>它是怎么做到的呢？</p><p>通俗地讲，当模型处理一句话中某一个位置的单词时，self-Attention允许它看一看这句话中其他位置的单词，看是否能够找到能够一些线索，有助于更好地表示（或者说编码）这个单词。</p><p>如果你对RNN比较熟悉的话，我们不妨做一个比较。RNN通过保存一个隐藏态，将前面词的信息编码后依次往后面传递，达到利用前面词的信息来编码当前词的目的。而self-Attention仿佛有个上帝之眼，纵观全局，看看上下文中每个词对当前词的贡献。</p><center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/1.png" alt=""></center><p>下面来看下具体是怎么实现的。</p><h2 id="Self-Attention-in-Detail"><a href="#Self-Attention-in-Detail" class="headerlink" title="Self-Attention in Detail"></a>Self-Attention in Detail</h2><p>首先，来看下怎样使用向量来计算self-attention，紧接着看如何用矩阵来计算self-attention。</p><h3 id="使用向量"><a href="#使用向量" class="headerlink" title="使用向量"></a>使用向量</h3><p>如下图所示，一般而言，输入的句子进入模型的第一步是对单词进行embedding，每个单词对应一个embedding。对于每个embedding，我们创建三个向量，Query、Key和Value向量。我们如何来创建三个向量呢？如图，我们假设embedding的维度为4，我们希望得到一个维度为3的Query、Key和Value向量，只需将每个embedding乘上一个维度为4*3的矩阵即可。这些矩阵就是训练过程中要学习的。</p><center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/2.png" alt=""><br></center><p>那么，Query、Key和Value向量代表什么呢？他们在attention的计算中发挥了什么样的作用呢？</p><p>我们用一个例子来说明：</p><p>首先要明确一点，self-attention其实是在计算每个单词对当前单词的贡献，也就是对每个单词对当前单词的贡献进行打分score。假设我们现在要计算下图中所有单词对第一个单词”Thinking”的打分。那么分分数如何计算呢，只需要将该单词的Query向量和待打分单词的Key向量做点乘即可。比如，第一个单词对第一个单词的分数为q1× k1，第二个单词对第一个单词的分数为q1×k2。</p><center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/3.png" alt=""><br></center><p>我们现在得到了两个单词对第一个单词的打分（分数是个数字了），然后将其进行softmax归一化。需要注意的是，在BERT模型中，作者在softmax之前将分数除以了Key的维度的平方根（据说可以保持梯度稳定）。softmax得到的是每个单词在Thinking这个单词上的贡献的权重。显然，当前单词对其自身的贡献肯定是最大的。</p><p>接着就是Value向量登场的地方了。将上面的分数分别和Value向量相乘，注意这里是对应位置相乘。</p><center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/4.png" alt=""><br></center><p>最后，将相乘的结果求和，这就得到了self-attention层对当前位置单词的输出。对每个单词进行如上操作，就能得到整个句子的attention输出了。在实际使用过程中，一般采用矩阵计算使整个过程更加高效。</p><center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/5.png" alt=""><br></center><p>在开始矩阵计算之前，先回顾总结一下上面的步骤：</p><ul><li>创建Query、Key、Value向量</li><li>计算每个单词在当前单词的分数</li><li>将分数归一化后与Value相乘</li><li>求和</li></ul><p>值得注意的是，上面阐述的过程实际上是Attention机制的计算流程，对于self-Attention，Query=Value。</p><h3 id="Matrix-Calculation-of-Self-Attention"><a href="#Matrix-Calculation-of-Self-Attention" class="headerlink" title="Matrix Calculation of Self-Attention"></a>Matrix Calculation of Self-Attention</h3><p>其实矩阵计算就是将上面的向量放在一起，同时参与计算。</p><p>首先，将embedding向量pack成一个矩阵X。假设我们有一句话有长度为10，embedding维度为4，那么X的维度为（10 × 4）.</p><center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/6.png" alt=""><br></center><p>假设我们设定Q、K、V的维度为3.第二步我们构造一个维度为（4×3）的权值矩阵。将其与X做矩阵乘法，得到一个10×3的矩阵，这就能得到Query了。依样画葫芦，同样可以得到Key和Value。</p><center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/7.png" alt=""><br></center><p>最后，将Query和Key相乘，得到打分，然后经过softmax，接着乘上V的到最终的输出。</p><center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/8.png" alt=""><br></center>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;BERT解读（一）self-Attention&quot;&gt;&lt;a href=&quot;#BERT解读（一）self-Attention&quot; class=&quot;headerlink&quot; title=&quot;BERT解读（一）self-Attention&quot;&gt;&lt;/a&gt;BERT解读（一）self-Att
+      
+    
+    </summary>
+    
+      <category term="深度学习" scheme="http://state-of-art.top/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+      <category term="自然语言处理" scheme="http://state-of-art.top/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/"/>
+    
+    
+      <category term="BERT" scheme="http://state-of-art.top/tags/BERT/"/>
+    
+      <category term="Attention" scheme="http://state-of-art.top/tags/Attention/"/>
+    
+  </entry>
   
   <entry>
     <title>Torchtext读取JSON数据</title>

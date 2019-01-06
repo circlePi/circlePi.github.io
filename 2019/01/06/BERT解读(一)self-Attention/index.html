@@ -113,7 +113,7 @@
 
 
 
-  <meta name="keywords" content="machine learning, deep learning">
+  <meta name="keywords" content="BERT,Attention,">
 
 
 
@@ -126,17 +126,27 @@
 
 
 
-<meta name="description" content="饮钱江水，恋皖南家">
-<meta name="keywords" content="machine learning, deep learning, nlp">
-<meta property="og:type" content="website">
-<meta property="og:title" content="circlepi&#39;s blog">
-<meta property="og:url" content="http://state-of-art.top/tags/CRF/index.html">
+<meta name="description" content="BERT解读（一）self-Attention概述本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。 讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它">
+<meta name="keywords" content="BERT,Attention">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BERT解读(一) self——attention">
+<meta property="og:url" content="http://state-of-art.top/2019/01/06/BERT解读(一)self-Attention/index.html">
 <meta property="og:site_name" content="circlepi&#39;s blog">
-<meta property="og:description" content="饮钱江水，恋皖南家">
+<meta property="og:description" content="BERT解读（一）self-Attention概述本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。 讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/1.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/2.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/3.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/4.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/5.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/6.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/7.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/8.png">
+<meta property="og:updated_time" content="2019-01-06T13:06:21.638Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="circlepi&#39;s blog">
-<meta name="twitter:description" content="饮钱江水，恋皖南家">
+<meta name="twitter:title" content="BERT解读(一) self——attention">
+<meta name="twitter:description" content="BERT解读（一）self-Attention概述本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。 讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它">
+<meta name="twitter:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/1.png">
 
 
 
@@ -166,13 +176,13 @@
 
 
 
-  <link rel="canonical" href="http://state-of-art.top/tags/CRF/">
+  <link rel="canonical" href="http://state-of-art.top/2019/01/06/BERT解读(一)self-Attention/">
 
 
 
 
 
-  <title>标签: CRF | circlepi's blog</title>
+  <title>BERT解读(一) self——attention | circlepi's blog</title>
   
 
 
@@ -191,7 +201,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
@@ -328,130 +338,278 @@
           <div id="content" class="content">
             
 
+  <div id="posts" class="posts-expand">
+    
+
+  
+
   
   
   
-  <div class="post-block tag">
-
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>CRF<small>标签</small>
-        </h1>
-      </div>
-
-      
-        
 
   <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://state-of-art.top/2019/01/06/BERT解读(一)self-Attention/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="circlepi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/touxiang.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="circlepi's blog">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2018/12/31/BiLSTM模型中CRF层的运行原理（四） 代码实现/" itemprop="url">
-              
-                <span itemprop="name">BiLSTM模型中CRF层的代码实现（四）</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">BERT解读(一) self——attention</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2018-12-31T23:30:08+08:00" content="2018-12-31">
-          12-31
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-06T23:30:08+08:00">
+                2019-01-06
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/深度学习/" itemprop="url" rel="index">
+                    <span itemprop="name">深度学习</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/深度学习/自然语言处理/" itemprop="url" rel="index">
+                    <span itemprop="name">自然语言处理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/01/06/BERT解读(一)self-Attention/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/01/06/BERT解读(一)self-Attention/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.4k
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/12/31/CRF-Layer-on-the-Top-of-BiLSTM+--3/" itemprop="url">
-              
-                <span itemprop="name">BiLSTM模型中CRF层的运行原理(三)</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2018-12-31T23:27:08+08:00" content="2018-12-31">
-          12-31
-        </time>
-      </div>
-
-    </header>
-  </article>
-
+      
 
       
-        
+        <h1 id="BERT解读（一）self-Attention"><a href="#BERT解读（一）self-Attention" class="headerlink" title="BERT解读（一）self-Attention"></a>BERT解读（一）self-Attention</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。</p>
+<p>讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它另辟蹊径，采用的是attention机制对文本序列进行特征提取。</p>
+<p>所以我们从self-Attention出发。</p>
+<p>文章内容参考<a href="https://jalammar.github.io/illustrated-transformer/，jalammar的博客十分通俗易懂，且切中要害，本系列内容不乏很多翻译自jalammar的博客。" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/，jalammar的博客十分通俗易懂，且切中要害，本系列内容不乏很多翻译自jalammar的博客。</a></p>
+<h2 id="Attention-is-all-your-need"><a href="#Attention-is-all-your-need" class="headerlink" title="Attention is all your need"></a>Attention is all your need</h2><p>尽管attention机制由来已久，但真正令其声名大噪的是google 2017年的这篇名为《attention is all your need》的论文。</p>
+<p>让我们从一个简单的例子看起：</p>
+<p>假设我们想用机器翻译的手段将下面这句话翻译成中文：</p>
+<p>“The animal didn’t cross the street because it was too tired”</p>
+<p>当机器读到“it”时，“it”代表“animal”还是“street”呢？对于人类来讲，这是一个极其简单的问题，但是对于机器或者说算法来讲却十分不容易。</p>
+<p>self-Attention则是处理此类问题的一个解决方案，也是目前看起来一个比较好的方案。当模型处理到“it”时，self-Attention可以将“it”和“animal‘联系到一起。</p>
+<p>它是怎么做到的呢？</p>
+<p>通俗地讲，当模型处理一句话中某一个位置的单词时，self-Attention允许它看一看这句话中其他位置的单词，看是否能够找到能够一些线索，有助于更好地表示（或者说编码）这个单词。</p>
+<p>如果你对RNN比较熟悉的话，我们不妨做一个比较。RNN通过保存一个隐藏态，将前面词的信息编码后依次往后面传递，达到利用前面词的信息来编码当前词的目的。而self-Attention仿佛有个上帝之眼，纵观全局，看看上下文中每个词对当前词的贡献。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/1.png" alt=""></center>
 
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
+<p>下面来看下具体是怎么实现的。</p>
+<h2 id="Self-Attention-in-Detail"><a href="#Self-Attention-in-Detail" class="headerlink" title="Self-Attention in Detail"></a>Self-Attention in Detail</h2><p>首先，来看下怎样使用向量来计算self-attention，紧接着看如何用矩阵来计算self-attention。</p>
+<h3 id="使用向量"><a href="#使用向量" class="headerlink" title="使用向量"></a>使用向量</h3><p>如下图所示，一般而言，输入的句子进入模型的第一步是对单词进行embedding，每个单词对应一个embedding。对于每个embedding，我们创建三个向量，Query、Key和Value向量。我们如何来创建三个向量呢？如图，我们假设embedding的维度为4，我们希望得到一个维度为3的Query、Key和Value向量，只需将每个embedding乘上一个维度为4*3的矩阵即可。这些矩阵就是训练过程中要学习的。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/2.png" alt=""><br></center>
 
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/12/31/CRF-Layer-on-the-Top-of-BiLSTM+--2/" itemprop="url">
-              
-                <span itemprop="name">BiLSTM模型中CRF层的运行原理(二)</span>
-              
-            </a>
-        
-      </h2>
+<p>那么，Query、Key和Value向量代表什么呢？他们在attention的计算中发挥了什么样的作用呢？</p>
+<p>我们用一个例子来说明：</p>
+<p>首先要明确一点，self-attention其实是在计算每个单词对当前单词的贡献，也就是对每个单词对当前单词的贡献进行打分score。假设我们现在要计算下图中所有单词对第一个单词”Thinking”的打分。那么分分数如何计算呢，只需要将该单词的Query向量和待打分单词的Key向量做点乘即可。比如，第一个单词对第一个单词的分数为q1× k1，第二个单词对第一个单词的分数为q1×k2。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/3.png" alt=""><br></center>
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2018-12-31T23:21:08+08:00" content="2018-12-31">
-          12-31
-        </time>
-      </div>
+<p>我们现在得到了两个单词对第一个单词的打分（分数是个数字了），然后将其进行softmax归一化。需要注意的是，在BERT模型中，作者在softmax之前将分数除以了Key的维度的平方根（据说可以保持梯度稳定）。softmax得到的是每个单词在Thinking这个单词上的贡献的权重。显然，当前单词对其自身的贡献肯定是最大的。</p>
+<p>接着就是Value向量登场的地方了。将上面的分数分别和Value向量相乘，注意这里是对应位置相乘。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/4.png" alt=""><br></center>
 
-    </header>
-  </article>
+<p>最后，将相乘的结果求和，这就得到了self-attention层对当前位置单词的输出。对每个单词进行如上操作，就能得到整个句子的attention输出了。在实际使用过程中，一般采用矩阵计算使整个过程更加高效。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/5.png" alt=""><br></center>
 
+<p>在开始矩阵计算之前，先回顾总结一下上面的步骤：</p>
+<ul>
+<li>创建Query、Key、Value向量</li>
+<li>计算每个单词在当前单词的分数</li>
+<li>将分数归一化后与Value相乘</li>
+<li>求和</li>
+</ul>
+<p>值得注意的是，上面阐述的过程实际上是Attention机制的计算流程，对于self-Attention，Query=Value。</p>
+<h3 id="Matrix-Calculation-of-Self-Attention"><a href="#Matrix-Calculation-of-Self-Attention" class="headerlink" title="Matrix Calculation of Self-Attention"></a>Matrix Calculation of Self-Attention</h3><p>其实矩阵计算就是将上面的向量放在一起，同时参与计算。</p>
+<p>首先，将embedding向量pack成一个矩阵X。假设我们有一句话有长度为10，embedding维度为4，那么X的维度为（10 × 4）.</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/6.png" alt=""><br></center>
 
-      
-        
+<p>假设我们设定Q、K、V的维度为3.第二步我们构造一个维度为（4×3）的权值矩阵。将其与X做矩阵乘法，得到一个10×3的矩阵，这就能得到Query了。依样画葫芦，同样可以得到Key和Value。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/7.png" alt=""><br></center>
 
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/12/31/CRF-Layer-on-the-Top-of-BiLSTM+--1/" itemprop="url">
-              
-                <span itemprop="name">BiLSTM模型中CRF层的运行原理(一)</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2018-12-31T23:20:08+08:00" content="2018-12-31">
-          12-31
-        </time>
-      </div>
-
-    </header>
-  </article>
+<p>最后，将Query和Key相乘，得到打分，然后经过softmax，接着乘上V的到最终的输出。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/8.png" alt=""><br></center>
 
 
       
     </div>
+    
+    
+    
 
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    circlepi
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://state-of-art.top/2019/01/06/BERT解读(一)self-Attention/" title="BERT解读(一) self——attention">http://state-of-art.top/2019/01/06/BERT解读(一)self-Attention/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/BERT/" rel="tag"># BERT</a>
+          
+            <a href="/tags/Attention/" rel="tag"># Attention</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/31/TORCHTEXT读取JSON数据/" rel="next" title="Torchtext读取JSON数据">
+                <i class="fa fa-chevron-left"></i> Torchtext读取JSON数据
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -459,6 +617,13 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
 
         </div>
         
@@ -479,8 +644,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -591,6 +765,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#BERT解读（一）self-Attention"><span class="nav-number">1.</span> <span class="nav-text">BERT解读（一）self-Attention</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attention-is-all-your-need"><span class="nav-number">1.2.</span> <span class="nav-text">Attention is all your need</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Self-Attention-in-Detail"><span class="nav-number">1.3.</span> <span class="nav-text">Self-Attention in Detail</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用向量"><span class="nav-number">1.3.1.</span> <span class="nav-text">使用向量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Matrix-Calculation-of-Self-Attention"><span class="nav-number">1.3.2.</span> <span class="nav-text">Matrix Calculation of Self-Attention</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -743,6 +933,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
