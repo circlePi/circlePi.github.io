@@ -113,7 +113,7 @@
 
 
 
-  <meta name="keywords" content="超参数,学习率,">
+  <meta name="keywords" content="BERT,Attention,">
 
 
 
@@ -126,30 +126,27 @@
 
 
 
-<meta name="description" content="本文介绍神经网络训练中的周期性学习率技术。 Introduction学习率(learning_rate, LR)是神经网络训练过程中最重要的超参数之一，它对于快速、高效地训练神经网络至关重要。简单来说，LR决定了我们当前的权重参数朝着降低损失的方向上改变多少。 1new_weight = exsiting_weight - learning_rate * gradient  Fig.: A sim">
-<meta name="keywords" content="超参数,学习率">
+<meta name="description" content="BERT解读（一）self-Attention概述本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。 讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它">
+<meta name="keywords" content="BERT,Attention">
 <meta property="og:type" content="article">
-<meta property="og:title" content="周期性学习率(Cyclical Learning Rate)技术">
-<meta property="og:url" content="http://state-of-art.top/2018/10/28/周期性学习率技术/index.html">
+<meta property="og:title" content="BERT解读(一) self——attention">
+<meta property="og:url" content="http://state-of-art.top/2019/01/06/BERT系列(一)Self-attention/index.html">
 <meta property="og:site_name" content="circlepi&#39;s blog">
-<meta property="og:description" content="本文介绍神经网络训练中的周期性学习率技术。 Introduction学习率(learning_rate, LR)是神经网络训练过程中最重要的超参数之一，它对于快速、高效地训练神经网络至关重要。简单来说，LR决定了我们当前的权重参数朝着降低损失的方向上改变多少。 1new_weight = exsiting_weight - learning_rate * gradient  Fig.: A sim">
+<meta property="og:description" content="BERT解读（一）self-Attention概述本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。 讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-neural_network-7.png">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-learningrates.jpeg">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/%E8%87%AA%E9%80%82%E5%BA%94SGD%E6%96%B9%E6%B3%95.gif">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/%E9%A9%AC%E9%9E%8D%E7%82%B9.gif">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-triangle.png">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-graph.png">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-deciding-baselr-maxlr.png">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-triangular2.png">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-exp_range.png">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-cifar10.png">
-<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-adam.png">
-<meta property="og:updated_time" content="2018-10-30T14:25:09.279Z">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/1.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/2.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/3.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/4.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/5.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/6.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/7.png">
+<meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/8.png">
+<meta property="og:updated_time" content="2019-01-17T12:24:47.925Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="周期性学习率(Cyclical Learning Rate)技术">
-<meta name="twitter:description" content="本文介绍神经网络训练中的周期性学习率技术。 Introduction学习率(learning_rate, LR)是神经网络训练过程中最重要的超参数之一，它对于快速、高效地训练神经网络至关重要。简单来说，LR决定了我们当前的权重参数朝着降低损失的方向上改变多少。 1new_weight = exsiting_weight - learning_rate * gradient  Fig.: A sim">
-<meta name="twitter:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-neural_network-7.png">
+<meta name="twitter:title" content="BERT解读(一) self——attention">
+<meta name="twitter:description" content="BERT解读（一）self-Attention概述本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。 讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它">
+<meta name="twitter:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/1.png">
 
 
 
@@ -179,13 +176,13 @@
 
 
 
-  <link rel="canonical" href="http://state-of-art.top/2018/10/28/周期性学习率技术/">
+  <link rel="canonical" href="http://state-of-art.top/2019/01/06/BERT系列(一)Self-attention/">
 
 
 
 
 
-  <title>周期性学习率(Cyclical Learning Rate)技术 | circlepi's blog</title>
+  <title>BERT解读(一) self——attention | circlepi's blog</title>
   
 
 
@@ -355,7 +352,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://state-of-art.top/2018/10/28/周期性学习率技术/">
+    <link itemprop="mainEntityOfPage" href="http://state-of-art.top/2019/01/06/BERT系列(一)Self-attention/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="circlepi">
@@ -372,7 +369,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">周期性学习率(Cyclical Learning Rate)技术</h1>
+          <h1 class="post-title" itemprop="name headline">BERT解读(一) self——attention</h1>
         
 
         <div class="post-meta">
@@ -384,8 +381,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-28T23:21:08+08:00">
-                2018-10-28
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-06T23:30:08+08:00">
+                2019-01-06
               </time>
             
 
@@ -414,6 +411,17 @@
 
                 
                 
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/深度学习/自然语言处理/" itemprop="url" rel="index">
+                    <span itemprop="name">自然语言处理</span>
+                  </a>
+                </span>
+
+                
+                
               
             </span>
           
@@ -425,8 +433,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/10/28/周期性学习率技术/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/28/周期性学习率技术/" itemprop="commentCount"></span>
+                <a href="/2019/01/06/BERT系列(一)Self-attention/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/01/06/BERT系列(一)Self-attention/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -448,7 +456,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  2.2k
+                  1.4k
                 </span>
               
 
@@ -473,88 +481,56 @@
       
 
       
-        <p>本文介绍神经网络训练中的周期性学习率技术。</p>
-<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>学习率(learning_rate, LR)是神经网络训练过程中最重要的超参数之一，它对于快速、高效地训练神经网络至关重要。简单来说，LR决定了我们当前的权重参数朝着降低损失的方向上改变多少。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">new_weight = exsiting_weight - learning_rate * gradient</span><br></pre></td></tr></table></figure>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-neural_network-7.png" alt="image text"></p>
-<p><em><center>Fig.: A simple neural network where the w’s and b’s are to be learnt (Img Credit: Matt Mazur)</center></em></p>
-<p>这看上去很简单。但是正如许多研究显示的那样，单单通过提升这一步就会对我们的训练产生深远的影响，并且尚有很大的优化空间。</p>
-<p>本文介绍了一种叫做周期性学习率（CLR）的技术，它是一种非常新的、简单的想法，用来设置和控制训练过程中LR的大小。该技术在<a href="https://twitter.com/jeremyphoward" target="_blank" rel="noopener">jeremyphoward</a>今年的<a href="http://www.fast.ai/" target="_blank" rel="noopener">fast.ai course</a>课程中提及过。</p>
-<h2 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h2><p>神经网络用来完成某项任务需要对大量参数进行训练。参数训练意味着寻找合适的一些参数，使得在每个batch训练完成后损失（loss）达到最小，而参数更新的方式则与LR密切相关。</p>
-<p>通常来说，有两种广泛使用的方法用来设置训练过程中的LR。</p>
-<h3 id="One-LR-for-all-parameters"><a href="#One-LR-for-all-parameters" class="headerlink" title="One LR for all parameters"></a>One LR for all parameters</h3><p>一个典型的例子是<a href="https://en.wikipedia.org/wiki/Stochastic_gradient_descent" target="_blank" rel="noopener">SGD</a>， 在训练开始时设置一个LR常量，并且设定一个LR衰减策略（如step，exponential等）。这个单一的LR用来更新所有的参数。在每个epochs中，LR按预先设定随时间逐渐衰减，当我们临近最小损失时， 通过衰减可以减缓更新，以防止我们越过最小值。</p>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-learningrates.jpeg" alt="image text"></p>
-<p><em><center>Fig. Effect of various learning rates on convergence (Img Credit: cs231n)</center></em></p>
-<p>该方法存在如下挑战(<a href="https://arxiv.org/abs/1609.04747" target="_blank" rel="noopener">refer</a>)：</p>
-<ol>
-<li>难以选择初始的LR达到想要的效果（如上图所示）；</li>
-<li>LR衰减策略同样难以设定，他们很难自适应动态变化的数据；</li>
-<li>所有的参数使用相同的LR进行更新，而这些参数可能学习速率不完全相同；</li>
-<li>很容易陷入马鞍点不能自拔</li>
-</ol>
-<h3 id="Adaptive-LR-for-each-parameter"><a href="#Adaptive-LR-for-each-parameter" class="headerlink" title="Adaptive LR for each parameter"></a>Adaptive LR for each parameter</h3><p>一些改进的优化器如<em>AdaGrad</em>, <em>AdaDelta</em>, <em>RMSprop</em> and <em>Adam</em> 很大程度上缓解了上述困难，方法是对每个参数采用不同的自适应学习率。比如AdaDelta，它的更新机制甚至不需要我们主动设置默认的学习率。</p>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/%E8%87%AA%E9%80%82%E5%BA%94SGD%E6%96%B9%E6%B3%95.gif" alt="image text"></p>
-<p><em><center>Fig: Animation comparing optimization algorithms (Img Credit: Alec Radford)</center></em></p>
-<h2 id="Cycling-Learning-Rate"><a href="#Cycling-Learning-Rate" class="headerlink" title="Cycling Learning Rate"></a>Cycling Learning Rate</h2><p>CLR是Leslie Smith于2015年提出的。这是一种调节LR的方法，在该方法中，设定一个LR上限和下限，LR的值在上限和下限的区间里周期性地变化。看上去，LCR似乎是自适应LR技术和SGD的竞争者，事实上，CLR技术是可以和上述提到的改进的优化器一起使用来进行参数更新的。</p>
-<p>而在计算上，CLR比上述提到的改进的优化器更容易实现，正如文献[1]所述：</p>
-<p><em>Adaptive learning rates are fundamentally different from CLR policies, and CLR can be combined with adaptive learning rates, as shown in Section 4.1. In addition, CLR policies are computationally simpler than adaptive learning rates. CLR is likely most similar to the SGDR method that appeared recently.</em></p>
-<h3 id="Why-it-works"><a href="#Why-it-works" class="headerlink" title="Why it works"></a>Why it works</h3><p>直觉上看，随着训练进度的增加我们应该保持学习率一直减小以便于在某一时刻达到收敛。</p>
-<p>然而，事实恰与直觉相反，使用一个在给定区间里周期性变化的LR可能更有用处。原因是周期性高的学习率能够使模型跳出在训练过程中遇到的局部最低点和马鞍点。事实上，Dauphin等[3]指出相比于局部最低点，马鞍点更加阻碍收敛。如果马鞍点正好发生在一个巧妙的平衡点，小的学习率通常不能产生足够大的梯度改变使其跳过该点（即使跳过，也需要花费很长时间）。这正是周期性高学习率的作用所在，它能够更快地跳过马鞍点。</p>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/%E9%A9%AC%E9%9E%8D%E7%82%B9.gif" alt="image text"></p>
-<p><em><center>Fig.: A saddle point in the error surface (Img Credit: safaribooksonline)</center></em></p>
-<p>另外一个好处是，最优的LR肯定落在最小值和最大值之间。换言之，我们确实在迭代过程中使用了最好的LR。</p>
-<h4 id="Epoch，iterations-cycles-and-stepsize"><a href="#Epoch，iterations-cycles-and-stepsize" class="headerlink" title="Epoch，iterations, cycles and stepsize"></a>Epoch，iterations, cycles and stepsize</h4><p>首先介绍几个术语，理解这些术语可以更好地理解下面描述的算法和公式。</p>
-<p>我们现在考虑一个包含50000个样本的训练集。</p>
-<p>一个epoch是至将整个训练集训练一轮。如果我们将batch_size, 我们在一个epoch里会得到500个batch或者叫iteration。iteration的数目随着epoch的增加不断积累，在第二个epoch，对应着501到1000次iteration，后面的以此类推。</p>
-<p>一个cycle定义为学习率从低到高，然后从高到低走一轮所用的iteration数。而stepsize指的是cycle迭代步数的一半。注意，cycle不一定必须和epoch相同，但实践上通常将cycle和epoch对应相同的iteration。</p>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-triangle.png" alt="image text"></p>
-<p><em><center>Fig: Triangular LR policy. (Img Credit: <a href="https://arxiv.org/pdf/1506.01186.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1506.01186.pdf</a>)</center></em></p>
-<p>在上图中，两条红线分别表示学习率最小值（base lr）和学习率最大值（max lr）。蓝色的线是学习率随着iteration改变的方式。蓝线上下一次表示一个cycle，stepsize则是其一半。</p>
-<h3 id="Calculating-the-LR"><a href="#Calculating-the-LR" class="headerlink" title="Calculating the LR"></a>Calculating the LR</h3><p>综上所述，接下来我们需要参数作为该算法的输入：</p>
+        <h1 id="BERT解读（一）self-Attention"><a href="#BERT解读（一）self-Attention" class="headerlink" title="BERT解读（一）self-Attention"></a>BERT解读（一）self-Attention</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。</p>
+<p>讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它另辟蹊径，采用的是attention机制对文本序列进行特征提取。</p>
+<p>所以我们从self-Attention出发。</p>
+<p>文章内容参考<a href="https://jalammar.github.io/illustrated-transformer/，jalammar的博客十分通俗易懂，且切中要害，本系列内容不乏很多翻译自jalammar的博客。" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/，jalammar的博客十分通俗易懂，且切中要害，本系列内容不乏很多翻译自jalammar的博客。</a></p>
+<h2 id="Attention-is-all-your-need"><a href="#Attention-is-all-your-need" class="headerlink" title="Attention is all your need"></a>Attention is all your need</h2><p>尽管attention机制由来已久，但真正令其声名大噪的是google 2017年的这篇名为《attention is all your need》的论文。</p>
+<p>让我们从一个简单的例子看起：</p>
+<p>假设我们想用机器翻译的手段将下面这句话翻译成中文：</p>
+<p>“The animal didn’t cross the street because it was too tired”</p>
+<p>当机器读到“it”时，“it”代表“animal”还是“street”呢？对于人类来讲，这是一个极其简单的问题，但是对于机器或者说算法来讲却十分不容易。</p>
+<p>self-Attention则是处理此类问题的一个解决方案，也是目前看起来一个比较好的方案。当模型处理到“it”时，self-Attention可以将“it”和“animal‘联系到一起。</p>
+<p>它是怎么做到的呢？</p>
+<p>通俗地讲，当模型处理一句话中某一个位置的单词时，self-Attention允许它看一看这句话中其他位置的单词，看是否能够找到能够一些线索，有助于更好地表示（或者说编码）这个单词。</p>
+<p>如果你对RNN比较熟悉的话，我们不妨做一个比较。RNN通过保存一个隐藏态，将前面词的信息编码后依次往后面传递，达到利用前面词的信息来编码当前词的目的。而self-Attention仿佛有个上帝之眼，纵观全局，看看上下文中每个词对当前词的贡献。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/1.png" alt=""></center>
+
+<p>下面来看下具体是怎么实现的。</p>
+<h2 id="Self-Attention-in-Detail"><a href="#Self-Attention-in-Detail" class="headerlink" title="Self-Attention in Detail"></a>Self-Attention in Detail</h2><p>首先，来看下怎样使用向量来计算self-attention，紧接着看如何用矩阵来计算self-attention。</p>
+<h3 id="使用向量"><a href="#使用向量" class="headerlink" title="使用向量"></a>使用向量</h3><p>如下图所示，一般而言，输入的句子进入模型的第一步是对单词进行embedding，每个单词对应一个embedding。对于每个embedding，我们创建三个向量，Query、Key和Value向量。我们如何来创建三个向量呢？如图，我们假设embedding的维度为4，我们希望得到一个维度为3的Query、Key和Value向量，只需将每个embedding乘上一个维度为4*3的矩阵即可。这些矩阵就是训练过程中要学习的。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/2.png" alt=""><br></center>
+
+<p>那么，Query、Key和Value向量代表什么呢？他们在attention的计算中发挥了什么样的作用呢？</p>
+<p>我们用一个例子来说明：</p>
+<p>首先要明确一点，self-attention其实是在计算每个单词对当前单词的贡献，也就是对每个单词对当前单词的贡献进行打分score。假设我们现在要计算下图中所有单词对第一个单词”Thinking”的打分。那么分分数如何计算呢，只需要将该单词的Query向量和待打分单词的Key向量做点乘即可。比如，第一个单词对第一个单词的分数为q1× k1，第二个单词对第一个单词的分数为q1×k2。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/3.png" alt=""><br></center>
+
+<p>我们现在得到了两个单词对第一个单词的打分（分数是个数字了），然后将其进行softmax归一化。需要注意的是，在BERT模型中，作者在softmax之前将分数除以了Key的维度的平方根（据说可以保持梯度稳定）。softmax得到的是每个单词在Thinking这个单词上的贡献的权重。显然，当前单词对其自身的贡献肯定是最大的。</p>
+<p>接着就是Value向量登场的地方了。将上面的分数分别和Value向量相乘，注意这里是对应位置相乘。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/4.png" alt=""><br></center>
+
+<p>最后，将相乘的结果求和，这就得到了self-attention层对当前位置单词的输出。对每个单词进行如上操作，就能得到整个句子的attention输出了。在实际使用过程中，一般采用矩阵计算使整个过程更加高效。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/5.png" alt=""><br></center>
+
+<p>在开始矩阵计算之前，先回顾总结一下上面的步骤：</p>
 <ul>
-<li><p>stepsize</p>
-</li>
-<li><p>base_lr</p>
-</li>
-<li><p>max_lr</p>
-</li>
+<li>创建Query、Key、Value向量</li>
+<li>计算每个单词在当前单词的分数</li>
+<li>将分数归一化后与Value相乘</li>
+<li>求和</li>
 </ul>
-<p>下面是LR更新的一段代码。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_triangular_lr</span><span class="params">(iteration, stepsize, base_lr, max_lr)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    Given the inputs, calculates the lr that should be</span></span><br><span class="line"><span class="string">    applicable for this iteration</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    cycle = np.floor(<span class="number">1</span> + iteration/(<span class="number">2</span>  * stepsize))</span><br><span class="line">    x = np.abs(iteration/stepsize - <span class="number">2</span> * cycle + <span class="number">1</span>)</span><br><span class="line">    lr = base_lr + (max_lr - base_lr) * np.maximum(<span class="number">0</span>, (<span class="number">1</span>-x))</span><br><span class="line">    <span class="keyword">return</span> lr</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment"># Demo of how the LR varies with iterations</span></span><br><span class="line">    num_iterations = <span class="number">10000</span></span><br><span class="line">    stepsize = <span class="number">1000</span></span><br><span class="line">    base_lr = <span class="number">0.0001</span></span><br><span class="line">    max_lr = <span class="number">0.001</span></span><br><span class="line">    lr_trend = list()</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> iteration <span class="keyword">in</span> range(num_iterations):</span><br><span class="line">        lr = get_triangular_lr(iteration, stepsize, base_lr, max_lr)</span><br><span class="line">        <span class="comment"># Update your optimizer to use this learning rate in this iteration</span></span><br><span class="line">        lr_trend.append(lr)</span><br><span class="line">    </span><br><span class="line">    plt.plot(lr_trend)</span><br><span class="line">    plt.show()</span><br></pre></td></tr></table></figure>
-<p>结果如下图所示。</p>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-graph.png" alt="image text"></p>
-<p><em><center>Fig: Graph showing the variation of lr with iteration. We are using the triangular profile.</center></em></p>
-<h3 id="Deriving-the-optimal-base-lr-and-max-lr"><a href="#Deriving-the-optimal-base-lr-and-max-lr" class="headerlink" title="Deriving the optimal base lr and max lr"></a>Deriving the optimal base lr and max lr</h3><p>对于给定的数据集，怎么确定合理的base lr 和max lr呢？</p>
-<p>答案是先跑几个epoch，并且让学习率线性增加，观察准确率的变化，从中选出合适的base 和max lr。</p>
-<p>我们让学习率按照上面的斜率进行增长，跑了几轮，结果如下图所示。</p>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-deciding-baselr-maxlr.png" alt="image text"></p>
-<p><em><center>Fig: Plot of accuracy vs learning rate (Img Credit: <a href="https://arxiv.org/pdf/1506.01186.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1506.01186.pdf</a>)</center></em></p>
-<p>可以看出，开始的时候，准确率随着学习率的增加而增加，然后进入平缓起期，然后又开始减小，出现震荡。注意图中准确率开始增长的那一点和达到平衡的那一点（图中红色箭头所示）。这两个点可以作为比较好的base lr 和 max lr。当然，你也可以选择平衡点旁边的准确率峰值点作为max lr， 把base lr 设为其1/3 或者1/4。</p>
-<p>好了，三个参数中已经有两个确定了，那么怎么确定stepsize呢？</p>
-<p>已经有论文做过实验，他们将stepsize设成一个epoch包含的iteration数量的2-10倍。拿我们之前举的例子来说，我们一个epoch包含500个iteration，那么stepsize就设成1000-5000。该论文实验表明，stepsize设成2倍或者10倍，两者结果并没有太大的不同。</p>
-<h3 id="Variants"><a href="#Variants" class="headerlink" title="Variants"></a>Variants</h3><p>上面我们实现的算法中，学习率是按照三角的规律周期性变化。除了这种以外，还有其他几种不同的函数形式。</p>
-<p><strong><em>traiangular2：</em></strong>这里max lr 按cycle进行对半衰减。</p>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-triangular2.png" alt="image text"></p>
-<p><em><center>Fig: Graph showing the variation of lr with iteration for the triangular2 approach (Img Credit: Brad Kenstler)</center></em></p>
-<p><strong><em>exp_range：</em></strong>这里max lr按iteration进行指数衰减。</p>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-exp_range.png" alt="image text"></p>
-<p><em><center>Fig: Graph showing the variation of lr with iteration for the exp-range approach (Img Credit: Brad Kenstler)</center></em></p>
-<p>这些与固定学习率的指数衰减（exponential decay）相比，有论文表明效果都得到了明显的提升。</p>
-<h3 id="Results"><a href="#Results" class="headerlink" title="Results"></a>Results</h3><p>如下图所示，在某神经网络上，CLR提供了一个快速的收敛，因此它的确值得一试。</p>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-cifar10.png" alt="image text"></p>
-<p><em><center>Fig. CLR tested on CIFAR 10 (Img Credit: <a href="https://arxiv.org/pdf/1506.01186.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1506.01186.pdf</a>)</center></em></p>
-<p>在上图的试验中，CLR花了25K次迭代达到了81%的准确率，传统的LR更新方法大约需要70K才能达到同样的水平。</p>
-<p><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/blog_2/15-clr-adam.png" alt="image text"></p>
-<p><em><center>Fig. CLR used with Nesterov and Adam. Much faster convergence with Nesterov (Nesterov is an improvement over SGD) (Img Credit: <a href="https://arxiv.org/pdf/1506.01186.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1506.01186.pdf</a>)</center></em></p>
-<p>在另一项试验中，如上图所示，CLR + Nesterov优化器比著名的Adam收敛的还要快。</p>
-<h3 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h3><p>CLR带来了一种新的方案来控制学习率的更新，它可以与SGD以及一些更加高级的优化器上一起使用。CLR应该成为每一个深度学习实践者工具箱里的一项技术。</p>
-<h3 id="References"><a href="#References" class="headerlink" title="References"></a>References</h3><ol>
-<li><a href="https://arxiv.org/pdf/1506.01186.pdf" target="_blank" rel="noopener">Cyclical Learning Rates for Training Neural Networks, Smith</a></li>
-<li><a href="https://arxiv.org/pdf/1609.04747.pdf" target="_blank" rel="noopener">An overview of gradient descent optimization algorithms, Rudder</a></li>
-<li>Y. N. Dauphin, H. de Vries, J. Chung, and Y. Bengio. Rmsprop and equilibrated adaptive learning rates for non-convex optimization.</li>
-<li><a href="https://arxiv.org/abs/1608.03983" target="_blank" rel="noopener">SGDR: Stochastic Gradient Descent with Warm Restarts, Loshchilov, Hutter</a></li>
-<li><a href="https://github.com/bckenstler/CLR" target="_blank" rel="noopener">https://github.com/bckenstler/CLR</a></li>
-</ol>
+<p>值得注意的是，上面阐述的过程实际上是Attention机制的计算流程，对于self-Attention，Query=Key=Value。</p>
+<h3 id="Matrix-Calculation-of-Self-Attention"><a href="#Matrix-Calculation-of-Self-Attention" class="headerlink" title="Matrix Calculation of Self-Attention"></a>Matrix Calculation of Self-Attention</h3><p>其实矩阵计算就是将上面的向量放在一起，同时参与计算。</p>
+<p>首先，将embedding向量pack成一个矩阵X。假设我们有一句话有长度为10，embedding维度为4，那么X的维度为（10 × 4）.</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/6.png" alt=""><br></center>
+
+<p>假设我们设定Q、K、V的维度为3.第二步我们构造一个维度为（4×3）的权值矩阵。将其与X做矩阵乘法，得到一个10×3的矩阵，这就能得到Query了。依样画葫芦，同样可以得到Key和Value。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/7.png" alt=""><br></center>
+
+<p>最后，将Query和Key相乘，得到打分，然后经过softmax，接着乘上V的到最终的输出。</p>
+<center><img src="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/8.png" alt=""><br></center>
+
 
       
     </div>
@@ -575,7 +551,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://state-of-art.top/2018/10/28/周期性学习率技术/" title="周期性学习率(Cyclical Learning Rate)技术">http://state-of-art.top/2018/10/28/周期性学习率技术/</a>
+    <a href="http://state-of-art.top/2019/01/06/BERT系列(一)Self-attention/" title="BERT解读(一) self——attention">http://state-of-art.top/2019/01/06/BERT系列(一)Self-attention/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -590,9 +566,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/超参数/" rel="tag"># 超参数</a>
+            <a href="/tags/BERT/" rel="tag"># BERT</a>
           
-            <a href="/tags/学习率/" rel="tag"># 学习率</a>
+            <a href="/tags/Attention/" rel="tag"># Attention</a>
           
         </div>
       
@@ -605,8 +581,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/10/27/TFrecord在动态图中的使用/" rel="next" title="图像数据-TFrecord在动态图中的使用">
-                <i class="fa fa-chevron-left"></i> 图像数据-TFrecord在动态图中的使用
+              <a href="/2018/12/31/TORCHTEXT读取JSON数据/" rel="next" title="Torchtext读取JSON数据">
+                <i class="fa fa-chevron-left"></i> Torchtext读取JSON数据
               </a>
             
           </div>
@@ -614,10 +590,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/11/28/torchtext读取文本数据集/" rel="prev" title="torchtext读取文本数据集">
-                torchtext读取文本数据集 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -803,7 +775,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Motivation"><span class="nav-number">2.</span> <span class="nav-text">Motivation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#One-LR-for-all-parameters"><span class="nav-number">2.1.</span> <span class="nav-text">One LR for all parameters</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Adaptive-LR-for-each-parameter"><span class="nav-number">2.2.</span> <span class="nav-text">Adaptive LR for each parameter</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cycling-Learning-Rate"><span class="nav-number">3.</span> <span class="nav-text">Cycling Learning Rate</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Why-it-works"><span class="nav-number">3.1.</span> <span class="nav-text">Why it works</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Epoch，iterations-cycles-and-stepsize"><span class="nav-number">3.1.1.</span> <span class="nav-text">Epoch，iterations, cycles and stepsize</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Calculating-the-LR"><span class="nav-number">3.2.</span> <span class="nav-text">Calculating the LR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deriving-the-optimal-base-lr-and-max-lr"><span class="nav-number">3.3.</span> <span class="nav-text">Deriving the optimal base lr and max lr</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Variants"><span class="nav-number">3.4.</span> <span class="nav-text">Variants</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Results"><span class="nav-number">3.5.</span> <span class="nav-text">Results</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Conclusion"><span class="nav-number">3.6.</span> <span class="nav-text">Conclusion</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#References"><span class="nav-number">3.7.</span> <span class="nav-text">References</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#BERT解读（一）self-Attention"><span class="nav-number">1.</span> <span class="nav-text">BERT解读（一）self-Attention</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attention-is-all-your-need"><span class="nav-number">1.2.</span> <span class="nav-text">Attention is all your need</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Self-Attention-in-Detail"><span class="nav-number">1.3.</span> <span class="nav-text">Self-Attention in Detail</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用向量"><span class="nav-number">1.3.1.</span> <span class="nav-text">使用向量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Matrix-Calculation-of-Self-Attention"><span class="nav-number">1.3.2.</span> <span class="nav-text">Matrix Calculation of Self-Attention</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
