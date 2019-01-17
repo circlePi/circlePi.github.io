@@ -1974,7 +1974,7 @@ img:hover {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #ffb659;
+  background: #d4ffff;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -3414,7 +3414,7 @@ span#inline-green {
   opacity: 1;
 }
 body {
-  background: url("http://pccpmaely.bkt.clouddn.com/18-10-27/30624240.jpg");
+  background: url("http://source.unsplash.com/random/1600x900");
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: 50% 50%;
