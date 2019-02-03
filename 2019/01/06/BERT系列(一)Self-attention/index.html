@@ -126,13 +126,13 @@
 
 
 
-<meta name="description" content="BERT解读（一）self-Attention概述本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。 讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它">
+<meta name="description" content="self-Attention概述讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它另辟蹊径，采用的是attention机制对文本序列进行特征提取。 所以我们从self-Attention出发。 文章内容参考https">
 <meta name="keywords" content="BERT,Attention">
 <meta property="og:type" content="article">
-<meta property="og:title" content="BERT解读(一) self——attention">
+<meta property="og:title" content="self-attention">
 <meta property="og:url" content="http://state-of-art.top/2019/01/06/BERT系列(一)Self-attention/index.html">
 <meta property="og:site_name" content="circlepi&#39;s blog">
-<meta property="og:description" content="BERT解读（一）self-Attention概述本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。 讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它">
+<meta property="og:description" content="self-Attention概述讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它另辟蹊径，采用的是attention机制对文本序列进行特征提取。 所以我们从self-Attention出发。 文章内容参考https">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/1.png">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/2.png">
@@ -142,10 +142,10 @@
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/6.png">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/7.png">
 <meta property="og:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/8.png">
-<meta property="og:updated_time" content="2019-01-17T12:24:47.925Z">
+<meta property="og:updated_time" content="2019-02-03T12:35:52.658Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="BERT解读(一) self——attention">
-<meta name="twitter:description" content="BERT解读（一）self-Attention概述本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。 讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它">
+<meta name="twitter:title" content="self-attention">
+<meta name="twitter:description" content="self-Attention概述讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它另辟蹊径，采用的是attention机制对文本序列进行特征提取。 所以我们从self-Attention出发。 文章内容参考https">
 <meta name="twitter:image" content="https://blog-1257937792.cos.ap-chengdu.myqcloud.com/BERT_1/1.png">
 
 
@@ -182,7 +182,7 @@
 
 
 
-  <title>BERT解读(一) self——attention | circlepi's blog</title>
+  <title>self-attention | circlepi's blog</title>
   
 
 
@@ -369,7 +369,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">BERT解读(一) self——attention</h1>
+          <h1 class="post-title" itemprop="name headline">self-attention</h1>
         
 
         <div class="post-meta">
@@ -481,8 +481,7 @@
       
 
       
-        <h1 id="BERT解读（一）self-Attention"><a href="#BERT解读（一）self-Attention" class="headerlink" title="BERT解读（一）self-Attention"></a>BERT解读（一）self-Attention</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>本系列文章希望对google BERT模型做一点解读。打算采取一种由点到线到面的方式，从基本的元素讲起，逐渐展开。</p>
-<p>讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它另辟蹊径，采用的是attention机制对文本序列进行特征提取。</p>
+        <h1 id="self-Attention"><a href="#self-Attention" class="headerlink" title="self-Attention"></a>self-Attention</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>讲到BERT就不能不提到Transformer，而self-attention则是Transformer的精髓所在。简单来说，可以将Transformer看成和RNN类似的特征提取器，而其有别于RNN、CNN这些传统特征提取器的是，它另辟蹊径，采用的是attention机制对文本序列进行特征提取。</p>
 <p>所以我们从self-Attention出发。</p>
 <p>文章内容参考<a href="https://jalammar.github.io/illustrated-transformer/，jalammar的博客十分通俗易懂，且切中要害，本系列内容不乏很多翻译自jalammar的博客。" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/，jalammar的博客十分通俗易懂，且切中要害，本系列内容不乏很多翻译自jalammar的博客。</a></p>
 <h2 id="Attention-is-all-your-need"><a href="#Attention-is-all-your-need" class="headerlink" title="Attention is all your need"></a>Attention is all your need</h2><p>尽管attention机制由来已久，但真正令其声名大噪的是google 2017年的这篇名为《attention is all your need》的论文。</p>
@@ -551,7 +550,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://state-of-art.top/2019/01/06/BERT系列(一)Self-attention/" title="BERT解读(一) self——attention">http://state-of-art.top/2019/01/06/BERT系列(一)Self-attention/</a>
+    <a href="http://state-of-art.top/2019/01/06/BERT系列(一)Self-attention/" title="self-attention">http://state-of-art.top/2019/01/06/BERT系列(一)Self-attention/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -675,7 +674,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -686,7 +685,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -697,7 +696,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-count">16</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -779,7 +778,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#BERT解读（一）self-Attention"><span class="nav-number">1.</span> <span class="nav-text">BERT解读（一）self-Attention</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attention-is-all-your-need"><span class="nav-number">1.2.</span> <span class="nav-text">Attention is all your need</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Self-Attention-in-Detail"><span class="nav-number">1.3.</span> <span class="nav-text">Self-Attention in Detail</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用向量"><span class="nav-number">1.3.1.</span> <span class="nav-text">使用向量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Matrix-Calculation-of-Self-Attention"><span class="nav-number">1.3.2.</span> <span class="nav-text">Matrix Calculation of Self-Attention</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#self-Attention"><span class="nav-number">1.</span> <span class="nav-text">self-Attention</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attention-is-all-your-need"><span class="nav-number">1.2.</span> <span class="nav-text">Attention is all your need</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Self-Attention-in-Detail"><span class="nav-number">1.3.</span> <span class="nav-text">Self-Attention in Detail</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用向量"><span class="nav-number">1.3.1.</span> <span class="nav-text">使用向量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Matrix-Calculation-of-Self-Attention"><span class="nav-number">1.3.2.</span> <span class="nav-text">Matrix Calculation of Self-Attention</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
@@ -831,7 +830,7 @@
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count">博客全站共31.1k字</span>
+  <span class="post-count">博客全站共31.7k字</span>
 </div>
 
 <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1275169677'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s13.cnzz.com/z_stat.php%3Fid%3D1275169677%26show%3Dpic2' type='text/javascript'%3E%3C/script%3E"));</script>
